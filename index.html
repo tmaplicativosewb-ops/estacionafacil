@@ -1,0 +1,3746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#3A86FF">
+<link rel="icon" sizes="192x192" href="/icons/icon-192.png" type="image/png">
+<link rel="icon" sizes="512x512" href="/icons/icon-512.png" type="image/png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TM Estacionamento Web</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Estilos CSS */
+        :root {
+            --cor-principal: #3a86ff;
+            --cor-fundo: #f0f4f8;
+            --cor-fundo-card: #ffffff;
+            --cor-sombra: rgba(0, 0, 0, 0.1);
+            --cor-texto: #333;
+            --cor-borda: #ddd;
+            --cor-sucesso: #28a745;
+            --cor-erro: #dc3545;
+            --cor-aviso: #f0ad4e;
+            --transicao-rapida: 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+        }
+
+        /* Tela de Login */
+        #login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background-color: var(--cor-fundo);
+        }
+
+        #login-form-card {
+            background-color: var(--cor-fundo-card);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px var(--cor-sombra);
+            width: 350px;
+            max-width: 90%;
+            border: 1px solid var(--cor-borda);
+        }
+
+        #login-form-card h1 {
+            color: var(--cor-principal);
+            margin-bottom: 5px;
+        }
+
+        #login-form-card p {
+            margin-bottom: 25px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color var(--transicao-rapida);
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--cor-principal);
+        }
+
+        #login-form-card button, .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--cor-principal);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color var(--transicao-rapida);
+        }
+
+        #login-form-card button:hover, .btn:hover {
+            background-color: #0050b3;
+        }
+
+        #login-error, #login-success {
+            color: var(--cor-erro);
+            margin-top: 15px;
+            font-size: 0.9em;
+            display: none;
+        }
+        
+        #login-success {
+            color: var(--cor-sucesso);
+        }
+
+        /* Aplicação Principal */
+        #main-app {
+            display: none;
+            height: 100vh;
+            width: 100%;
+            display: flex; /* Usado para o layout principal com sidebar e content */
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            transition: width var(--transicao-rapida);
+            position: fixed;
+            height: 100%;
+            overflow-x: hidden;
+            flex-shrink: 0;
+            z-index: 1000;
+        }
+
+        #sidebar.collapsed {
+            width: 70px;
+        }
+        
+        #sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        #sidebar.collapsed #sidebar-header {
+            justify-content: center;
+            padding: 0;
+        }
+
+        #sidebar-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: opacity var(--transicao-rapida);
+        }
+
+        #sidebar.collapsed #sidebar-header h2 {
+            opacity: 0;
+            width: 0;
+            margin: 0;
+        }
+
+        #sidebar-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 15px;
+            transition: transform var(--transicao-rapida);
+        }
+
+        #sidebar.collapsed #sidebar-toggle {
+            transform: rotate(180deg);
+            margin-right: 0;
+        }
+
+        #sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #sidebar ul li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color var(--transicao-rapida);
+        }
+
+        #sidebar ul li a:hover,
+        #sidebar ul li a.active {
+            background-color: #34495e;
+            border-left: 4px solid var(--cor-principal);
+            padding-left: 16px;
+        }
+
+        .sidebar-item-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: opacity var(--transicao-rapida);
+        }
+
+        #sidebar.collapsed .sidebar-item-text {
+            opacity: 0;
+            width: 0;
+        }
+
+        /* Conteúdo Principal */
+        #content-container {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+            transition: margin-left var(--transicao-rapida);
+            box-sizing: border-box;
+        }
+
+        #sidebar.collapsed ~ #content-container {
+            margin-left: 70px;
+        }
+
+        .dashboard-card {
+            background-color: var(--cor-fundo-card);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px var(--cor-sombra);
+            margin-bottom: 20px;
+            border: 1px solid var(--cor-borda);
+        }
+        
+        .icon {
+            margin-right: 15px;
+            min-width: 24px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+        }
+
+        /* Classes para mostrar/esconder seções */
+        .content-section {
+            display: none;
+        }
+
+        /* Estilos da Tabela de Veículos e Relatórios */
+        #veiculos-section table, #relatorios-section table, #clientes-section table, #vendas-section table, #financeiro-section table, #configuracoes-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: var(--cor-fundo-card);
+            box-shadow: 0 4px 10px var(--cor-sombra);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #veiculos-section th, #veiculos-section td,
+        #relatorios-section th, #relatorios-section td,
+        #clientes-section th, #clientes-section td,
+        #vendas-section th, #vendas-section td,
+        #financeiro-section th, #financeiro-section td,
+        #configuracoes-section th, #configuracoes-section td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--cor-borda);
+        }
+
+        #veiculos-section th, #relatorios-section th, #clientes-section th, #vendas-section th, #financeiro-section th, #configuracoes-section th {
+            background-color: var(--cor-principal);
+            color: white;
+            font-weight: bold;
+        }
+
+        #veiculos-section tr:nth-child(even), #relatorios-section tr:nth-child(even), #clientes-section tr:nth-child(even), #vendas-section tr:nth-child(even), #financeiro-section tr:nth-child(even), #configuracoes-section tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        #veiculos-section .btn-saida {
+            background-color: var(--cor-sucesso);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            width: auto;
+        }
+
+        #veiculos-section .btn-saida:hover {
+            background-color: #218838;
+        }
+        
+        #veiculos-form, #configuracoes-form, #mensalista-form, #cadastro-produto-form, #contas-pagar-form, #pagamentos-fornecedor-form, #pagamentos-salario-form, #vales-funcionario-form, #cadastro-usuario-form {
+            background-color: var(--cor-fundo-card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px var(--cor-sombra);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        #veiculos-form .input-group input, #veiculos-form .input-group select,
+        #configuracoes-form .input-group input, #configuracoes-form .input-group select,
+        #mensalista-form .input-group input, #mensalista-form .input-group select,
+        #cadastro-produto-form .input-group input, #cadastro-produto-form .input-group select,
+        #vendas-section .input-group input, #vendas-section .input-group select,
+        #financeiro-section .input-group input, #financeiro-section .input-group select, #financeiro-section .input-group textarea {
+            border-radius: 5px;
+        }
+        
+        #veiculos-form button, #configuracoes-form button, #mensalista-form button, #cadastro-produto-form button, #financeiro-section button {
+            background-color: var(--cor-sucesso);
+            font-size: 1em;
+        }
+        
+        #veiculos-form button:hover, #configuracoes-form button:hover, #mensalista-form button:hover, #cadastro-produto-form button:hover, #financeiro-section button:hover {
+            background-color: #218838;
+        }
+        
+        #configuracoes-form .input-group label, #mensalista-form .input-group label, #cadastro-produto-form .input-group label, #vendas-section .input-group label, #financeiro-section .input-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        #status-message, #mensalista-status-message, #status-configuracoes, #produto-status-message, #venda-status-message, #financeiro-status-message, #usuario-status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            text-align: center;
+            display: none;
+        }
+
+        .status-success {
+            background-color: var(--cor-sucesso);
+        }
+
+        .status-error {
+            background-color: var(--cor-erro);
+        }
+        
+        #relatorios-section .btn-limpar {
+            background-color: var(--cor-erro);
+            margin-top: 20px;
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        #relatorios-section .btn-limpar:hover {
+            background-color: #a71d2a;
+        }
+
+        /* Estilos da Seção de Vagas */
+        #vagas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .vaga-card {
+            background-color: var(--cor-fundo-card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px var(--cor-sombra);
+            text-align: center;
+            border: 2px solid;
+            transition: all var(--transicao-rapida);
+        }
+        
+        .vaga-card.livre {
+            border-color: var(--cor-sucesso);
+            background-color: #e6f7ec;
+        }
+
+        .vaga-card.ocupada {
+            border-color: var(--cor-erro);
+            background-color: #fcebeb;
+        }
+
+        .vaga-card h4 {
+            margin: 0;
+            font-size: 1.2em;
+            color: var(--cor-principal);
+        }
+
+        .vaga-card p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .vaga-card .placa {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: var(--cor-texto);
+        }
+
+        .vaga-card .tempo {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        #configuracoes-form .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        #configuracoes-form .btn-group button {
+            width: auto;
+            flex-grow: 1;
+        }
+        
+        /* Modal de Cobrança (para veículos e mensalistas) */
+        #cobranca-modal, #mensalista-pagamento-modal, #venda-pagamento-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #cobranca-content, #mensalista-pagamento-content, #venda-pagamento-content {
+            background-color: var(--cor-fundo-card);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            width: 450px;
+            max-width: 90%;
+            text-align: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #cobranca-content h2, #mensalista-pagamento-content h2, #venda-pagamento-content h2 {
+            margin-top: 0;
+            color: var(--cor-principal);
+        }
+
+        #cobranca-content p, #mensalista-pagamento-content p, #venda-pagamento-content p {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .cobranca-placa, .mensalista-nome-modal, .venda-total-modal {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--cor-texto);
+        }
+
+        .cobranca-tempo, .cobranca-custo, .mensalista-valor-total-modal, .venda-valor-final-modal {
+            font-size: 1.3em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .cobranca-custo, .mensalista-valor-total-modal, .venda-valor-final-modal {
+            color: var(--cor-sucesso);
+            font-size: 2em;
+        }
+        
+        /* Estilos do Troco */
+        #troco-container, #mensalista-troco-container, #venda-troco-container {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        #troco-container label, #mensalista-troco-container label, #venda-troco-container label {
+            font-weight: bold;
+        }
+
+        #troco-container input, #mensalista-troco-container input, #venda-troco-container input {
+            padding: 12px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        #troco-valor, #mensalista-troco-valor, #venda-troco-valor {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--cor-principal);
+            margin: 10px 0;
+        }
+        
+        #troco-error, #mensalista-troco-error, #venda-troco-error {
+            color: var(--cor-erro);
+            font-size: 0.9em;
+            margin: 5px 0;
+            display: none;
+        }
+
+        .btn-pagamento-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-pagamento {
+            background-color: #6c757d;
+            flex-grow: 1;
+        }
+        
+        .btn-pagamento:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Estilos da Seção de Caixa */
+        #caixa-content-container {
+            background-color: var(--cor-fundo-card);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px var(--cor-sombra);
+            margin-top: 20px;
+        }
+
+        .caixa-item-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            border-top: 1px solid var(--cor-borda);
+            border-bottom: 1px solid var(--cor-borda);
+        }
+
+        .caixa-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .caixa-item:not(:last-child) {
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .caixa-item-valor {
+            font-weight: bold;
+            color: var(--cor-sucesso);
+        }
+
+        .caixa-status {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        /* Estilos para Recibo */
+        .recibo-container {
+            font-family: 'monospace';
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            width: 100%;
+            max-width: 500px; /* Para PDF/A4 */
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .recibo-header, .recibo-footer {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .recibo-body {
+            border-top: 1px dashed #999;
+            border-bottom: 1px dashed #999;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+        .recibo-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .recibo-total {
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .recibo-detalhes p {
+            margin: 3px 0;
+        }
+
+        /* Custom Alert/Confirm Modal */
+        #custom-modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        #custom-modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 400px;
+            text-align: center;
+        }
+        #custom-modal-title {
+            color: var(--cor-principal);
+            margin-bottom: 15px;
+        }
+        #custom-modal-message {
+            margin-bottom: 20px;
+        }
+        #custom-modal-buttons .btn {
+            width: auto;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-container">
+        <div id="login-form-card">
+            <h1>TM Aplicativos Web</h1>
+            <p>Acesse o painel de controle do estacionamento</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Usuário" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Senha" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+            <p id="login-error">Usuário ou senha inválidos.</p>
+            <p id="login-success">Login realizado com sucesso!</p>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <aside id="sidebar">
+            <div id="sidebar-header">
+                <button id="sidebar-toggle">≡</button>
+                <h2>Estacionamento</h2>
+            </div>
+            <ul>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="dashboard-section">
+                        <span class="icon">&#x1F4CA;</span> <span class="sidebar-item-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="vagas-section">
+                        <span class="icon">&#x1F6A7;</span> <span class="sidebar-item-text">Vagas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="veiculos-section">
+                        <span class="icon">&#x1F697;</span> <span class="sidebar-item-text">Veículos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="vendas-section">
+                        <span class="icon">&#x1F4B8;</span> <span class="sidebar-item-text">Vendas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="caixa-section">
+                        <span class="icon">&#x1F4B0;</span> <span class="sidebar-item-text">Caixa</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="financeiro-section">
+                        <span class="icon">&#x1F4B5;</span> <span class="sidebar-item-text">Financeiro</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="relatorios-section">
+                        <span class="icon">&#x1F4C4;</span> <span class="sidebar-item-text">Relatórios</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="clientes-section">
+                        <span class="icon">&#x1F464;</span> <span class="sidebar-item-text">Clientes Mensalistas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="configuracoes-section">
+                        <span class="icon">&#x2699;</span> <span class="sidebar-item-text">Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main id="content-container">
+            <section id="dashboard-section" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h1>Dashboard</h1>
+                    <button id="logout-btn" class="btn" style="background-color: var(--cor-erro); width: auto; padding: 10px 20px;">Sair</button>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Vagas Disponíveis</h2>
+                    <p id="vagas-disponiveis">Carregando...</p>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Veículos Estacionados</h2>
+                    <p id="veiculos-estacionados">Carregando...</p>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Clientes Mensalistas</h2>
+                    <p id="total-clientes-mensalistas">Carregando...</p>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Mensalistas em Atraso</h2>
+                    <p id="mensalistas-em-atraso">Carregando...</p>
+                </div>
+            </section>
+            
+            <section id="vagas-section" class="content-section">
+                <h1>Mapa de Vagas</h1>
+                <p>Status em tempo real de cada vaga do estacionamento.</p>
+                <h3>Vagas para Carros</h3>
+                <div id="vagas-carro-grid" class="vagas-grid">
+                    </div>
+                <h3>Vagas para Motos</h3>
+                <div id="vagas-moto-grid" class="vagas-grid">
+                    </div>
+            </section>
+            
+            <section id="veiculos-section" class="content-section">
+                <h1>Gerenciar Veículos</h1>
+                
+                <form id="veiculos-form">
+                    <div class="input-group">
+                        <input type="text" id="placa" placeholder="Placa do Veículo (ex: ABC-1234)" required>
+                    </div>
+                    <div class="input-group">
+                        <select id="tipo" required>
+                            <option value="">Selecione o Tipo de Veículo</option>
+                            <option value="Carro">Carro</option>
+                            <option value="Moto">Moto</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="btn-entrada">Registrar Entrada</button>
+                    <p id="status-message"></p>
+                </form>
+
+                <h2>Veículos Estacionados</h2>
+                <div id="veiculos-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Tipo</th>
+                                <th>Entrada</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="veiculos-table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="vendas-section" class="content-section">
+                <h1>Gerenciar Vendas e Produtos</h1>
+
+                <div class="dashboard-card">
+                    <h2>Cadastro de Produtos</h2>
+                    <form id="cadastro-produto-form">
+                        <div class="input-group">
+                            <input type="text" id="produto-nome" placeholder="Nome do Produto" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="produto-categoria" placeholder="Categoria (ex: Bebidas, Doces)" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="produto-preco-custo">Preço de Custo (R$):</label>
+                            <input type="number" id="produto-preco-custo" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="produto-preco-venda">Preço de Venda (R$):</label>
+                            <input type="number" id="produto-preco-venda" step="0.01" min="0" required>
+                        </div>
+                        <button type="submit">Cadastrar Produto</button>
+                        <p id="produto-status-message"></p>
+                    </form>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Produtos Cadastrados</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Custo</th>
+                                <th>Venda</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-table-body">
+                            <!-- Produtos serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Realizar Venda</h2>
+                    <div id="realizar-venda-container">
+                        <div class="input-group">
+                            <select id="venda-produto-select" class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full">
+                                <option value="">Selecione um Produto</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="venda-quantidade">Quantidade:</label>
+                            <input type="number" id="venda-quantidade" value="1" min="1">
+                        </div>
+                        <button id="adicionar-ao-carrinho-btn" class="btn" style="background-color: var(--cor-principal);">Adicionar ao Carrinho</button>
+                    </div>
+
+                    <h3 class="mt-4">Carrinho de Compras</h3>
+                    <ul id="carrinho-list" class="caixa-item-list">
+                        <!-- Itens do carrinho serão adicionados aqui -->
+                    </ul>
+                    <div class="text-right mt-4">
+                        <p class="text-xl font-bold">Total do Carrinho: <span id="carrinho-total-valor" style="color: var(--cor-sucesso);">R$ 0,00</span></p>
+                        <button id="finalizar-venda-btn" class="btn mt-4" style="background-color: var(--cor-sucesso);">Finalizar Venda</button>
+                    </div>
+                    <p id="venda-status-message"></p>
+                </div>
+            </section>
+            
+            <section id="caixa-section" class="content-section">
+                <h1>Caixa</h1>
+                <div id="caixa-content-container">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold">Gerenciamento de Caixa</h2>
+                        <span id="caixa-status-text" class="caixa-status">Caixa Fechado</span>
+                    </div>
+                    
+                    <div id="caixa-controls" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+                        <input type="text" id="funcionario-caixa-input" placeholder="Nome do Funcionário" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full">
+                        <input type="number" id="valor-inicial-caixa-input" placeholder="Valor Inicial (R$)" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" step="0.01" min="0">
+                        <button id="abrir-caixa-btn" class="btn btn-entrada w-full md:w-auto" style="background-color: var(--cor-sucesso);">Abrir Caixa</button>
+                        <button id="fechar-caixa-btn" class="btn w-full md:w-auto" style="background-color: var(--cor-erro);">Fechar Caixa</button>
+                    </div>
+
+                    <div id="adicionar-item-caixa-section" style="display: none;">
+                        <h3 class="text-lg font-bold mb-2">Adicionar Receita Extra</h3>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                            <input type="text" id="item-descricao-input" placeholder="Descrição do Item" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full">
+                            <input type="number" id="item-valor-input" placeholder="Valor (R$)" class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full md:w-1/3" step="0.01" min="0">
+                            <button id="adicionar-item-btn" class="btn btn-entrada w-full md:w-auto">Adicionar</button>
+                        </div>
+                    </div>
+
+                    <div id="fechamento-caixa-input-container" style="display: none;">
+                        <h3 class="text-lg font-bold mb-2">Fechamento de Caixa</h3>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                            <input type="number" id="valor-final-caixa-input" placeholder="Valor Final Contado (R$)" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" step="0.01" min="0">
+                            <button id="confirmar-fechamento-btn" class="btn w-full md:w-auto" style="background-color: var(--cor-erro);">Confirmar Fechamento</button>
+                        </div>
+                        <p id="diferenca-caixa-display" class="mt-2 text-center font-bold"></p>
+                    </div>
+
+                    <div id="caixa-resumo">
+                        <h3>Resumo do Caixa</h3>
+                        <p>Funcionário: <span id="funcionario-caixa-display">-</span></p>
+                        <p>Valor Inicial: <span id="valor-inicial-display">R$ 0,00</span></p>
+                        <p>Total Atual: <span id="caixa-total-display">R$ 0,00</span></p>
+                        <ul id="caixa-itens-list" class="caixa-item-list">
+                            <!-- Itens do caixa serão adicionados aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="financeiro-section" class="content-section">
+                <h1>Financeiro</h1>
+                <p>Gerencie contas a pagar, pagamentos a fornecedores, salários e vales.</p>
+
+                <div class="dashboard-card">
+                    <h2>Contas a Pagar</h2>
+                    <form id="contas-pagar-form">
+                        <div class="input-group">
+                            <label for="conta-descricao">Descrição da Conta:</label>
+                            <input type="text" id="conta-descricao" placeholder="Descrição da conta" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="conta-categoria">Categoria:</label>
+                            <input type="text" id="conta-categoria" placeholder="Categoria (ex: Energia, Água, Aluguel)" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="conta-valor">Valor (R$):</label>
+                            <input type="number" id="conta-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="conta-vencimento">Data de Vencimento:</label>
+                            <input type="date" id="conta-vencimento" required>
+                        </div>
+                        <button type="submit">Adicionar Conta</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Contas Cadastradas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contas-pagar-table-body">
+                            <!-- Contas a pagar serão adicionadas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Pagamentos a Fornecedores</h2>
+                    <form id="pagamentos-fornecedor-form">
+                        <div class="input-group">
+                            <label for="fornecedor-nome">Nome do Fornecedor:</label>
+                            <input type="text" id="fornecedor-nome" placeholder="Nome do fornecedor" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-fornecedor-valor">Valor (R$):</label>
+                            <input type="number" id="pagamento-fornecedor-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-fornecedor-metodo">Método de Pagamento:</label>
+                            <select id="pagamento-fornecedor-metodo" required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <button type="submit">Registrar Pagamento</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Histórico de Pagamentos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fornecedor</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagamentos-fornecedor-table-body">
+                            <!-- Pagamentos a fornecedores serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Pagamentos de Salários</h2>
+                    <form id="pagamentos-salario-form">
+                        <div class="input-group">
+                            <label for="funcionario-nome-salario">Nome do Funcionário:</label>
+                            <input type="text" id="funcionario-nome-salario" placeholder="Nome do funcionário" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-salario-valor">Valor (R$):</label>
+                            <input type="number" id="pagamento-salario-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-salario-metodo">Método de Pagamento:</label>
+                            <select id="pagamento-salario-metodo" required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <button type="submit">Registrar Pagamento</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Histórico de Pagamentos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagamentos-salario-table-body">
+                            <!-- Pagamentos de salários serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Vales a Funcionários</h2>
+                    <form id="vales-funcionario-form">
+                        <div class="input-group">
+                            <label for="funcionario-nome-vale">Nome do Funcionário:</label>
+                            <input type="text" id="funcionario-nome-vale" placeholder="Nome do funcionário" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="vale-valor">Valor (R$):</label>
+                            <input type="number" id="vale-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="vale-metodo">Método de Pagamento:</label>
+                            <select id="vale-metodo" required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <button type="submit">Registrar Vale</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Histórico de Vales</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vales-funcionario-table-body">
+                            <!-- Vales a funcionários serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="financeiro-status-message"></p>
+            </section>
+            
+            <section id="relatorios-section" class="content-section">
+                <h1>Relatórios de Estacionamento</h1>
+                <p>Histórico de veículos que já saíram do estacionamento, incluindo a duração e o custo.</p>
+
+                <button id="btn-limpar-relatorios" class="btn btn-limpar">Limpar Relatórios</button>
+
+                <div id="relatorios-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Tipo</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Duração</th>
+                                <th>Custo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relatorios-table-body">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Resumo Financeiro</h2>
+                    <div class="input-group">
+                        <label for="relatorio-periodo">Período do Relatório:</label>
+                        <select id="relatorio-periodo" class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                            <option value="diario">Diário</option>
+                            <option value="semanal">Semanal</option>
+                            <option value="mensal">Mensal</option>
+                            <option value="total">Total</option>
+                        </select>
+                    </div>
+                    <p>Faturamento Total: <span id="faturamento-total-dia" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p>Receitas de Estacionamento: <span id="receitas-estacionamento" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="estacionamento-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="estacionamento-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="estacionamento-pix">R$ 0,00</span></p>
+
+                    <p>Receitas Extras do Caixa: <span id="receitas-extras-caixa" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="extras-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="extras-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="extras-pix">R$ 0,00</span></p>
+
+                    <p>Receitas de Mensalistas: <span id="receitas-mensalistas" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="mensalistas-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="mensalistas-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="mensalistas-pix">R$ 0,00</span></p>
+
+                    <p>Receitas de Vendas de Produtos: <span id="receitas-vendas-produtos" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="vendas-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="vendas-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="vendas-pix">R$ 0,00</span></p>
+
+                    <h3 style="margin-top: 15px;">Despesas</h3>
+                    <p>Contas Pagas: <span id="despesas-contas-pagas" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="contas-pagas-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="contas-pagas-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="contas-pagas-pix">R$ 0,00</span></p>
+
+                    <p>Pagamentos a Fornecedores: <span id="despesas-fornecedores" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="fornecedores-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="fornecedores-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="fornecedores-pix">R$ 0,00</span></p>
+
+                    <p>Pagamentos de Salários: <span id="despesas-salarios" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="salarios-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="salarios-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="salarios-pix">R$ 0,00</span></p>
+
+                    <p>Vales a Funcionários: <span id="despesas-vales" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="vales-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="vales-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="vales-pix">R$ 0,00</span></p>
+
+                    <button id="btn-exportar-financeiro" class="btn" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório Financeiro</button>
+                </div>
+                <div id="relatorio-financeiro-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Relatório de Vendas de Produtos</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
+                                <th>Data/Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendas-produtos-table-body">
+                            <!-- Vendas de produtos serão adicionadas aqui -->
+                        </tbody>
+                    </table>
+                    <button id="btn-exportar-vendas-produtos" class="btn" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório de Vendas</button>
+                </div>
+                 <div id="relatorio-vendas-produtos-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+            </section>
+            
+            <section id="clientes-section" class="content-section">
+                <h1>Clientes Mensalistas</h1>
+                <p>Gerenciar contratos de clientes com pagamentos mensais.</p>
+
+                <!-- Formulário para Cadastro de Clientes -->
+                <div class="dashboard-card">
+                    <h2>Cadastrar Novo Cliente</h2>
+                    <form id="mensalista-form">
+                        <div class="input-group">
+                            <input type="text" id="cliente-nome" placeholder="Nome do Cliente" required>
+                        </div>
+                        <div class="input-group">
+                            <select id="cliente-tipo-veiculo" required>
+                                <option value="">Tipo de Veículo</option>
+                                <option value="Carro">Carro</option>
+                                <option value="Moto">Moto</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="cliente-placa" placeholder="Placa do Veículo (ex: ABC-1234)" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="tel" id="cliente-telefone" placeholder="Telefone (ex: 99-99999-9999)">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="cliente-endereco" placeholder="Endereço">
+                        </div>
+                        <div class="input-group">
+                            <label for="cliente-valor-mensal">Valor Mensal (R$):</label>
+                            <input type="number" id="cliente-valor-mensal" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="cliente-data-vencimento">Data de Vencimento:</label>
+                            <input type="date" id="cliente-data-vencimento" required>
+                        </div>
+                        <button type="submit">Cadastrar Cliente</button>
+                    </form>
+                    <p id="mensalista-status-message" class="status-success" style="display: none;"></p>
+                </div>
+
+                <!-- Tabela para Listar Clientes Existentes -->
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Clientes Ativos</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Veículo</th>
+                                <th>Placa</th>
+                                <th>Telefone</th>
+                                <th>Valor Mensal</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mensalistas-table-body">
+                            <!-- Linhas de clientes serão adicionadas aqui pelo JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="configuracoes-section" class="content-section">
+                <h1>Configurações</h1>
+                <p>Defina a capacidade e os valores de estacionamento.</p>
+                <form id="configuracoes-form">
+                    <h3>Capacidade do Estacionamento</h3>
+                    <div class="input-group">
+                        <label for="vagas-carro">Vagas para Carros (máx. 300)</label>
+                        <input type="number" id="vagas-carro" step="1" min="1" max="300" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="vagas-moto">Vagas para Motos (máx. 200)</label>
+                        <input type="number" id="vagas-moto" step="1" min="1" max="200" required>
+                    </div>
+                    <h3>Preços de Estacionamento</h3>
+                    <div class="input-group">
+                        <label for="carro-primeira-hora">Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="carro-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="carro-hora-adicional">Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="carro-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="moto-primeira-hora">Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="moto-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="moto-hora-adicional">Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="moto-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="juros-mensalista-diario">Juros Mensalista Diário (%):</label>
+                        <input type="number" id="juros-mensalista-diario" step="0.01" min="0" max="100" required>
+                    </div>
+                    <button type="submit">Salvar Configurações</button>
+                    <p id="status-configuracoes"></p>
+                </form>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Gerenciar Usuários</h3>
+                    <form id="cadastro-usuario-form">
+                        <div class="input-group">
+                            <label for="novo-username">Nome de Usuário:</label>
+                            <input type="text" id="novo-username" placeholder="Nome de Usuário" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="novo-password">Senha:</label>
+                            <input type="password" id="novo-password" placeholder="Senha" required>
+                        </div>
+                        <button type="submit" style="background-color: var(--cor-principal);">Cadastrar Novo Usuário</button>
+                        <p id="usuario-status-message"></p>
+                    </form>
+
+                    <h4 style="margin-top: 20px;">Usuários Cadastrados</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome de Usuário</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuarios-table-body">
+                            <!-- Usuários serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal de Cobrança -->
+    <div id="cobranca-modal">
+        <div id="cobranca-content">
+            <h2>Cobrança de Estacionamento</h2>
+            <p>Placa: <span id="modal-placa" class="cobranca-placa"></span></p>
+            <p>Tempo: <span id="modal-duracao" class="cobranca-tempo"></span></p>
+            <p>Custo: <span id="modal-custo" class="cobranca-custo"></span></p>
+            
+            <div id="pagamento-opcoes" class="btn-pagamento-group">
+                <button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
+                <button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
+                <button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
+            </div>
+            
+            <div id="troco-container">
+                <label for="valor-recebido">Valor Recebido (R$):</label>
+                <input type="number" id="valor-recebido" step="0.01" min="0">
+                <p id="troco-valor">Troco: R$ 0,00</p>
+                <p id="troco-error">Valor insuficiente!</p>
+                <button id="btn-finalizar-dinheiro" class="btn" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento Mensalista -->
+    <div id="mensalista-pagamento-modal">
+        <div id="mensalista-pagamento-content">
+            <h2>Pagamento Mensalista</h2>
+            <p>Cliente: <span id="mensalista-nome-modal" class="mensalista-nome-modal"></span></p>
+            <p>Placa: <span id="mensalista-placa-modal"></span></p>
+            <p>Valor Base: <span id="mensalista-valor-base-modal"></span></p>
+            <p>Dias em Atraso: <span id="mensalista-dias-atraso-modal"></span></p>
+            <p>Juros: <span id="mensalista-juros-modal"></span></p>
+            <p>Total: <span id="mensalista-valor-total-modal" class="mensalista-valor-total-modal"></span></p>
+            
+            <div id="mensalista-pagamento-opcoes" class="btn-pagamento-group">
+                <button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
+                <button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
+                <button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
+            </div>
+            
+            <div id="mensalista-troco-container">
+                <label for="mensalista-valor-recebido">Valor Recebido (R$):</label>
+                <input type="number" id="mensalista-valor-recebido" step="0.01" min="0">
+                <p id="mensalista-troco-valor">Troco: R$ 0,00</p>
+                <p id="mensalista-troco-error">Valor insuficiente!</p>
+                <button id="btn-finalizar-mensalista-dinheiro" class="btn" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento de Vendas -->
+    <div id="venda-pagamento-modal">
+        <div id="venda-pagamento-content">
+            <h2>Finalizar Venda</h2>
+            <p>Total da Venda: <span id="venda-valor-total-modal" class="venda-valor-final-modal"></span></p>
+            
+            <div id="venda-pagamento-opcoes" class="btn-pagamento-group">
+                <button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
+                <button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
+                <button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
+            </div>
+            
+            <div id="venda-troco-container">
+                <label for="venda-valor-recebido">Valor Recebido (R$):</label>
+                <input type="number" id="venda-valor-recebido" step="0.01" min="0">
+                <p id="venda-troco-valor">Troco: R$ 0,00</p>
+                <p id="venda-troco-error">Valor insuficiente!</p>
+                <button id="btn-finalizar-venda-dinheiro" class="btn" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert/Confirm Modal -->
+    <div id="custom-modal-backdrop">
+        <div id="custom-modal-content">
+            <h3 id="custom-modal-title">Título</h3>
+            <p id="custom-modal-message">Mensagem</p>
+            <div id="custom-modal-buttons">
+                <button id="custom-modal-ok" class="btn" style="background-color: var(--cor-principal); margin-right: 10px;">OK</button>
+                <button id="custom-modal-cancel" class="btn" style="background-color: var(--cor-erro);">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Containers para PDFs -->
+    <div id="recibo-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+    <div id="comprovante-entrada-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+    <div id="comprovante-venda-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+
+    <script>
+        // Variáveis Globais
+        let vagasCarroTotal = 100;
+        let vagasMotoTotal = 50;
+        let carroPrecoPrimeiraHora = 5.00;
+        let carroPrecoHoraAdicional = 3.00;
+        let motoPrecoPrimeiraHora = 3.00;
+        let motoPrecoHoraAdicional = 2.00;
+        let jurosMensalistaDiario = 0.5;
+        let veiculosEstacionados = [];
+        let relatoriosHistorico = [];
+        let caixaAberto = false;
+        let funcionarioCaixa = '';
+        let caixaTotal = 0;
+        let caixaItens = [];
+        let clientesMensalistas = [];
+        let caixaValorInicial = 0;
+        let produtos = [];
+        let vendasProdutos = [];
+        let carrinhoVendas = [];
+        let contasAPagar = [];
+        let pagamentosFornecedores = [];
+        let pagamentosSalarios = [];
+        let valesFuncionarios = [];
+        let usuarios = [{ username: 'admin', password: 'admin', role: 'admin' }];
+        let isLoggedIn = false;
+        let currentUser = null;
+
+        // Elementos DOM
+        const loginContainer = document.getElementById('login-container');
+        const mainApp = document.getElementById('main-app');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const loginSuccess = document.getElementById('login-success');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        // Elementos Dashboard
+        const vagasDisponiveis = document.getElementById('vagas-disponiveis');
+        const veiculosEstacionadosDisplay = document.getElementById('veiculos-estacionados');
+        const totalClientesMensalistas = document.getElementById('total-clientes-mensalistas');
+        const mensalistasEmAtraso = document.getElementById('mensalistas-em-atraso');
+
+        // Elementos Veículos
+        const veiculosForm = document.getElementById('veiculos-form');
+        const veiculosTableBody = document.getElementById('veiculos-table-body');
+
+        // Elementos Relatórios
+        const relatoriosTableBody = document.getElementById('relatorios-table-body');
+        const btnLimparRelatorios = document.getElementById('btn-limpar-relatorios');
+
+        // Elementos Configurações
+        const configuracoes = document.getElementById('configuracoes-form');
+
+        // Elementos Vagas
+        const vagasCarroGrid = document.getElementById('vagas-carro-grid');
+        const vagasMotoGrid = document.getElementById('vagas-moto-grid');
+
+        // Elementos Caixa
+        const caixaStatusText = document.getElementById('caixa-status-text');
+        const funcionarioCaixaInput = document.getElementById('funcionario-caixa-input');
+        const valorInicialCaixaInput = document.getElementById('valor-inicial-caixa-input');
+        const abrirCaixaBtn = document.getElementById('abrir-caixa-btn');
+        const fecharCaixaBtn = document.getElementById('fechar-caixa-btn');
+        const adicionarItemCaixaSection = document.getElementById('adicionar-item-caixa-section');
+        const itemDescricaoInput = document.getElementById('item-descricao-input');
+        const itemValorInput = document.getElementById('item-valor-input');
+        const adicionarItemBtn = document.getElementById('adicionar-item-btn');
+        const funcionarioCaixaDisplay = document.getElementById('funcionario-caixa-display');
+        const valorInicialDisplay = document.getElementById('valor-inicial-display');
+        const caixaTotalDisplay = document.getElementById('caixa-total-display');
+        const caixaItensList = document.getElementById('caixa-itens-list');
+        const fechamentoCaixaInputContainer = document.getElementById('fechamento-caixa-input-container');
+        const valorFinalCaixaInput = document.getElementById('valor-final-caixa-input');
+        const confirmarFechamentoBtn = document.getElementById('confirmar-fechamento-btn');
+        const diferencaCaixaDisplay = document.getElementById('diferenca-caixa-display');
+
+        // Elementos Modal de Cobrança
+        const cobrancaModal = document.getElementById('cobranca-modal');
+        const modalPlaca = document.getElementById('modal-placa');
+        const modalDuracao = document.getElementById('modal-duracao');
+        const modalCusto = document.getElementById('modal-custo');
+        const pagamentoOpcoes = document.getElementById('pagamento-opcoes');
+        const trocoContainer = document.getElementById('troco-container');
+        const valorRecebidoInput = document.getElementById('valor-recebido');
+        const trocoValor = document.getElementById('troco-valor');
+        const trocoError = document.getElementById('troco-error');
+        const btnFinalizarDinheiro = document.getElementById('btn-finalizar-dinheiro');
+
+        // Elementos Clientes Mensalistas
+        const mensalistaForm = document.getElementById('mensalista-form');
+        const clientesNomeInput = document.getElementById('cliente-nome');
+        const clientesTipoVeiculoInput = document.getElementById('cliente-tipo-veiculo');
+        const clientesPlacaInput = document.getElementById('cliente-placa');
+        const clientesTelefoneInput = document.getElementById('cliente-telefone');
+        const clientesEnderecoInput = document.getElementById('cliente-endereco');
+        const clientesValorMensalInput = document.getElementById('cliente-valor-mensal');
+        const clientesDataVencimentoInput = document.getElementById('cliente-data-vencimento');
+        const mensalistasTableBody = document.getElementById('mensalistas-table-body');
+        const mensalistaStatusMessage = document.getElementById('mensalista-status-message');
+
+        // Modal de Pagamento Mensalista
+        const mensalistaPagamentoModal = document.getElementById('mensalista-pagamento-modal');
+        const mensalistaNomeModal = document.getElementById('mensalista-nome-modal');
+        const mensalistaPlacaModal = document.getElementById('mensalista-placa-modal');
+        const mensalistaValorBaseModal = document.getElementById('mensalista-valor-base-modal');
+        const mensalistaDiasAtrasoModal = document.getElementById('mensalista-dias-atraso-modal');
+        const mensalistaJurosModal = document.getElementById('mensalista-juros-modal');
+        const mensalistaValorTotalModal = document.getElementById('mensalista-valor-total-modal');
+        const mensalistaPagamentoOpcoes = document.getElementById('mensalista-pagamento-opcoes');
+        const mensalistaTrocoContainer = document.getElementById('mensalista-troco-container');
+        const mensalistaValorRecebidoInput = document.getElementById('mensalista-valor-recebido');
+        const mensalistaTrocoValor = document.getElementById('mensalista-troco-valor');
+        const mensalistaTrocoError = document.getElementById('mensalista-troco-error');
+        const btnFinalizarMensalistaDinheiro = document.getElementById('btn-finalizar-mensalista-dinheiro');
+        
+        // Custom Alert/Confirm Modals
+        const customModalBackdrop = document.getElementById('custom-modal-backdrop');
+        const customModalTitle = document.getElementById('custom-modal-title');
+        const customModalMessage = document.getElementById('custom-modal-message');
+        const customModalOkBtn = document.getElementById('custom-modal-ok');
+        const customModalCancelBtn = document.getElementById('custom-modal-cancel');
+
+        const reciboPdfContent = document.getElementById('recibo-pdf-content');
+
+        // Novos elementos para relatórios financeiros
+        const faturamentoTotalDia = document.getElementById('faturamento-total-dia');
+        const receitasEstacionamento = document.getElementById('receitas-estacionamento');
+        const receitasExtrasCaixa = document.getElementById('receitas-extras-caixa');
+        const receitasMensalistas = document.getElementById('receitas-mensalistas');
+        const receitasVendasProdutos = document.getElementById('receitas-vendas-produtos');
+        const btnExportarFinanceiro = document.getElementById('btn-exportar-financeiro');
+        const relatorioFinanceiroPdfContent = document.getElementById('relatorio-financeiro-pdf-content');
+        const vendasProdutosTableBody = document.getElementById('vendas-produtos-table-body');
+        const btnExportarVendasProdutos = document.getElementById('btn-exportar-vendas-produtos'); // Novo botão de exportar vendas
+        const relatorioVendasProdutosPdfContent = document.getElementById('relatorio-vendas-produtos-pdf-content'); // Novo container para o PDF de vendas
+
+        // Elementos de detalhe por pagamento (Receitas)
+        const estacionamentoDinheiro = document.getElementById('estacionamento-dinheiro');
+        const estacionamentoCartao = document.getElementById('estacionamento-cartao');
+        const estacionamentoPix = document.getElementById('estacionamento-pix');
+        const extrasDinheiro = document.getElementById('extras-dinheiro');
+        const extrasCartao = document.getElementById('extras-cartao');
+        const extrasPix = document.getElementById('extras-pix');
+        const mensalistasDinheiro = document.getElementById('mensalistas-dinheiro');
+        const mensalistasCartao = document.getElementById('mensalistas-cartao');
+        const mensalistasPix = document.getElementById('mensalistas-pix');
+        const vendasDinheiro = document.getElementById('vendas-dinheiro');
+        const vendasCartao = document.getElementById('vendas-cartao');
+        const vendasPix = document.getElementById('vendas-pix');
+
+        // Novos elementos para despesas e seus detalhes por pagamento
+        const despesasContasPagas = document.getElementById('despesas-contas-pagas');
+        const contasPagasDinheiro = document.getElementById('contas-pagas-dinheiro');
+        const contasPagasCartao = document.getElementById('contas-pagas-cartao');
+        const contasPagasPix = document.getElementById('contas-pagas-pix');
+
+        const despesasFornecedores = document.getElementById('despesas-fornecedores');
+        const fornecedoresDinheiro = document.getElementById('fornecedores-dinheiro');
+        const fornecedoresCartao = document.getElementById('fornecedores-cartao');
+        const fornecedoresPix = document.getElementById('fornecedores-pix');
+
+        const despesasSalarios = document.getElementById('despesas-salarios');
+        const salariosDinheiro = document.getElementById('salarios-dinheiro');
+        const salariosCartao = document.getElementById('salarios-cartao');
+        const salariosPix = document.getElementById('salarios-pix');
+
+        const despesasVales = document.getElementById('despesas-vales');
+        const valesDinheiro = document.getElementById('vales-dinheiro');
+        const valesCartao = document.getElementById('vales-cartao');
+        const valesPix = document.getElementById('vales-pix');
+
+        // Novo elemento para comprovante de entrada
+        const comprovanteEntradaPdfContent = document.getElementById('comprovante-entrada-pdf-content');
+
+        // Referência ao novo select
+        const relatorioPeriodoSelect = document.getElementById('relatorio-periodo');
+
+        // Elementos da seção de Vendas
+        const cadastroProdutoForm = document.getElementById('cadastro-produto-form');
+        const produtoNomeInput = document.getElementById('produto-nome');
+        const produtoCategoriaInput = document.getElementById('produto-categoria');
+        const produtoPrecoCustoInput = document.getElementById('produto-preco-custo');
+        const produtoPrecoVendaInput = document.getElementById('produto-preco-venda');
+        const produtoStatusMessage = document.getElementById('produto-status-message');
+        const produtosTableBody = document.getElementById('produtos-table-body');
+        const vendaProdutoSelect = document.getElementById('venda-produto-select');
+        const vendaQuantidadeInput = document.getElementById('venda-quantidade');
+        const adicionarAoCarrinhoBtn = document.getElementById('adicionar-ao-carrinho-btn');
+        const carrinhoList = document.getElementById('carrinho-list');
+        const carrinhoTotalValor = document.getElementById('carrinho-total-valor');
+        const finalizarVendaBtn = document.getElementById('finalizar-venda-btn');
+        const vendaStatusMessage = document.getElementById('venda-status-message');
+
+        // Elementos da seção Financeiro
+        const financeiroStatusMessage = document.getElementById('financeiro-status-message');
+
+        // Contas a Pagar
+        const contasPagarForm = document.getElementById('contas-pagar-form');
+        const contaDescricaoInput = document.getElementById('conta-descricao');
+        const contaCategoriaInput = document.getElementById('conta-categoria');
+        const contaValorInput = document.getElementById('conta-valor');
+        const contaVencimentoInput = document.getElementById('conta-vencimento');
+        const contasPagarTableBody = document.getElementById('contas-pagar-table-body');
+
+        // Pagamentos a Fornecedores
+        const pagamentosFornecedorForm = document.getElementById('pagamentos-fornecedor-form');
+        const fornecedorNomeInput = document.getElementById('fornecedor-nome');
+        const pagamentoFornecedorValorInput = document.getElementById('pagamento-fornecedor-valor');
+        const pagamentoFornecedorMetodoSelect = document.getElementById('pagamento-fornecedor-metodo');
+        const pagamentosFornecedorTableBody = document.getElementById('pagamentos-fornecedor-table-body');
+
+        // Pagamentos de Salários
+        const pagamentosSalarioForm = document.getElementById('pagamentos-salario-form');
+        const funcionarioNomeSalarioInput = document.getElementById('funcionario-nome-salario');
+        const pagamentoSalarioValorInput = document.getElementById('pagamento-salario-valor');
+        const pagamentoSalarioMetodoSelect = document.getElementById('pagamento-salario-metodo');
+        const pagamentosSalarioTableBody = document.getElementById('pagamentos-salario-table-body');
+
+        // Vales a Funcionários
+        const valesFuncionarioForm = document.getElementById('vales-funcionario-form');
+        const funcionarioNomeValeInput = document.getElementById('funcionario-nome-vale');
+        const valeValorInput = document.getElementById('vale-valor');
+        const valeMetodoSelect = document.getElementById('vale-metodo');
+        const valesFuncionarioTableBody = document.getElementById('vales-funcionario-table-body');
+
+        // Elementos de gerenciamento de usuários
+        const cadastroUsuarioForm = document.getElementById('cadastro-usuario-form');
+        const novoUsernameInput = document.getElementById('novo-username');
+        const novoPasswordInput = document.getElementById('novo-password');
+        const usuarioStatusMessage = document.getElementById('usuario-status-message');
+        const usuariosTableBody = document.getElementById('usuarios-table-body');
+        
+        // Botão de Logout
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Estado do Modal de Cobrança
+        let veiculoParaSaida = null;
+        let mensalistaParaPagamento = null;
+        let valorTotalMensalista = 0;
+        let vendaParaFinalizar = {
+            carrinho: [],
+            total: 0
+        };
+
+        // Elementos do Modal de Pagamento de Vendas
+        const vendaPagamentoModal = document.getElementById('venda-pagamento-modal');
+        const vendaValorTotalModal = document.getElementById('venda-valor-total-modal');
+        const vendaPagamentoOpcoes = document.getElementById('venda-pagamento-opcoes');
+        const vendaTrocoContainer = document.getElementById('venda-troco-container');
+        const vendaValorRecebidoInput = document.getElementById('venda-valor-recebido');
+        const vendaTrocoValor = document.getElementById('venda-troco-valor');
+        const vendaTrocoError = document.getElementById('venda-troco-error');
+        const btnFinalizarVendaDinheiro = document.getElementById('btn-finalizar-venda-dinheiro');
+        const comprovanteVendaPdfContent = document.getElementById('comprovante-venda-pdf-content');
+
+
+        // Funções de formatação e utilitários
+        const formatarMoeda = (valor) => `R$ ${valor.toFixed(2).replace('.', ',')}`;
+        const formatarDuracao = (duracao) => {
+            const horas = Math.floor(duracao);
+            const minutos = Math.floor((duracao - horas) * 60);
+            return `${horas}h ${minutos}min`;
+        };
+        const formatarData = (data) => new Date(data).toLocaleString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const formatarDataCurta = (data) => new Date(data).toLocaleDateString('pt-BR');
+
+        // Funções de Custom Modal (Alert/Confirm)
+        const showCustomAlert = (message, title = 'Aviso', callback = () => {}) => {
+            customModalTitle.textContent = title;
+            customModalMessage.textContent = message;
+            customModalCancelBtn.style.display = 'none';
+            customModalOkBtn.style.display = 'inline-block'; // Ensure OK button is visible
+            customModalBackdrop.style.display = 'flex';
+
+            customModalOkBtn.onclick = () => {
+                customModalBackdrop.style.display = 'none';
+                callback();
+            };
+        };
+
+        const showCustomConfirm = (message, title = 'Confirmação', callback = () => {}) => {
+            customModalTitle.textContent = title;
+            customModalMessage.textContent = message;
+            customModalCancelBtn.style.display = 'inline-block';
+            customModalOkBtn.style.display = 'inline-block'; // Ensure OK button is visible
+            customModalBackdrop.style.display = 'flex';
+
+            customModalOkBtn.onclick = () => {
+                customModalBackdrop.style.display = 'none';
+                callback(true);
+            };
+            customModalCancelBtn.onclick = () => {
+                customModalBackdrop.style.display = 'none';
+                callback(false);
+            };
+        };
+
+
+        // Funções de Gerenciamento de Dados
+        const salvarDados = () => {
+            const dados = {
+                vagasCarroTotal,
+                vagasMotoTotal,
+                carroPrecoPrimeiraHora,
+                carroPrecoHoraAdicional,
+                motoPrecoPrimeiraHora,
+                motoPrecoHoraAdicional,
+                jurosMensalistaDiario,
+                veiculosEstacionados,
+                relatoriosHistorico,
+                caixaAberto,
+                funcionarioCaixa,
+                caixaTotal,
+                caixaItens,
+                clientesMensalistas,
+                caixaValorInicial,
+                produtos,
+                vendasProdutos,
+                contasAPagar,
+                pagamentosFornecedores,
+                pagamentosSalarios,
+                valesFuncionarios,
+                usuarios // Salvar dados dos usuários
+            };
+            localStorage.setItem('estacionamentoDados', JSON.stringify(dados));
+        };
+
+        const carregarDados = () => {
+            const dadosSalvos = localStorage.getItem('estacionamentoDados');
+            if (dadosSalvos) {
+                const dados = JSON.parse(dadosSalvos);
+                vagasCarroTotal = dados.vagasCarroTotal || 100;
+                vagasMotoTotal = dados.vagasMotoTotal || 50;
+                carroPrecoPrimeiraHora = dados.carroPrecoPrimeiraHora || 5.00;
+                carroPrecoHoraAdicional = dados.carroPrecoHoraAdicional || 3.00;
+                motoPrecoPrimeiraHora = dados.motoPrecoPrimeiraHora || 3.00;
+                motoPrecoHoraAdicional = dados.motoPrecoHoraAdicional || 2.00;
+                jurosMensalistaDiario = dados.jurosMensalistaDiario || 0.5;
+                veiculosEstacionados = dados.veiculosEstacionados || [];
+                relatoriosHistorico = dados.relatoriosHistorico || [];
+                caixaAberto = dados.caixaAberto || false;
+                funcionarioCaixa = dados.funcionarioCaixa || '';
+                caixaTotal = dados.caixaTotal || 0;
+                caixaItens = dados.caixaItens || [];
+                clientesMensalistas = dados.clientesMensalistas || [];
+                caixaValorInicial = dados.caixaValorInicial || 0;
+                produtos = dados.produtos || [];
+                vendasProdutos = dados.vendasProdutos || [];
+                // Novos dados financeiros
+                contasAPagar = dados.contasAPagar || [];
+                pagamentosFornecedores = dados.pagamentosFornecedores || [];
+                pagamentosSalarios = dados.pagamentosSalarios || [];
+                valesFuncionarios = dados.valesFuncionarios || [];
+                // Carregar dados dos usuários, se existirem. Se não, manter o admin padrão.
+                if (dados.usuarios && dados.usuarios.length > 0) {
+                    usuarios = dados.usuarios;
+                }
+            }
+        };
+
+        // Funções de filtragem por período
+        const filterItemsByPeriod = (items, period, dateField = 'data') => {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            return items.filter(item => {
+                const itemDate = new Date(item[dateField]);
+                const itemDay = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate());
+                
+                switch(period) {
+                    case 'diario':
+                        return itemDay.getTime() === today.getTime();
+                    case 'semanal':
+                        const oneWeekAgo = new Date(today);
+                        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                        return itemDay >= oneWeekAgo && itemDay <= today;
+                    case 'mensal':
+                        return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+                    case 'total':
+                        return true;
+                    default:
+                        return true;
+                }
+            });
+        };
+
+        // Funções de Renderização
+        const renderDashboard = () => {
+            const vagasCarroOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Carro').length;
+            const vagasMotoOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Moto').length;
+            const vagasCarroLivres = vagasCarroTotal - vagasCarroOcupadas;
+            const vagasMotoLivres = vagasMotoTotal - vagasMotoOcupadas;
+            
+            vagasDisponiveis.textContent = `Carros: ${vagasCarroLivres}/${vagasCarroTotal} | Motos: ${vagasMotoLivres}/${vagasMotoTotal}`;
+            veiculosEstacionadosDisplay.textContent = veiculosEstacionados.length;
+            totalClientesMensalistas.textContent = clientesMensalistas.length;
+            
+            const hoje = new Date();
+            const mensalistasAtrasados = clientesMensalistas.filter(cliente => {
+                const vencimento = new Date(cliente.dataVencimento);
+                return vencimento < hoje;
+            }).length;
+            mensalistasEmAtraso.textContent = mensalistasAtrasados;
+        };
+
+        const renderVehiclesTable = () => {
+            veiculosTableBody.innerHTML = '';
+            veiculosEstacionados.forEach(veiculo => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${veiculo.placa}</td>
+                    <td>${veiculo.tipo}</td>
+                    <td>${formatarData(veiculo.entrada)}</td>
+                    <td>
+                        <button class="btn btn-saida" onclick="abrirModalCobranca('${veiculo.placa}')">Registrar Saída</button>
+                    </td>
+                `;
+                veiculosTableBody.appendChild(tr);
+            });
+        };
+
+        const renderRelatoriosTable = () => {
+            relatoriosTableBody.innerHTML = '';
+            relatoriosHistorico.forEach(relatorio => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${relatorio.placa}</td>
+                    <td>${relatorio.tipo}</td>
+                    <td>${formatarData(relatorio.entrada)}</td>
+                    <td>${formatarData(relatorio.saida)}</td>
+                    <td>${formatarDuracao(relatorio.duracao)}</td>
+                    <td>${formatarMoeda(relatorio.custo)}</td>
+                `;
+                relatoriosTableBody.appendChild(tr);
+            });
+
+            // Renderizar vendas de produtos
+            vendasProdutosTableBody.innerHTML = '';
+            vendasProdutos.forEach(venda => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${venda.nomeProduto}</td>
+                    <td>${venda.categoria}</td>
+                    <td>${venda.quantidade}</td>
+                    <td>${formatarMoeda(venda.valorTotal)}</td>
+                    <td>${formatarData(venda.data)}</td>
+                `;
+                vendasProdutosTableBody.appendChild(tr);
+            });
+        };
+
+        const renderVagas = () => {
+            // Renderizar vagas de carros
+            vagasCarroGrid.innerHTML = '';
+            for (let i = 1; i <= vagasCarroTotal; i++) {
+                const vagaId = `carro-${i}`;
+                const veiculo = veiculosEstacionados.find(v => v.vaga === vagaId);
+                const div = document.createElement('div');
+                div.className = `vaga-card ${veiculo ? 'ocupada' : 'livre'}`;
+                
+                if (veiculo) {
+                    const tempoEstacionado = (new Date() - new Date(veiculo.entrada)) / (1000 * 60 * 60);
+                    div.innerHTML = `
+                        <h4>Vaga C${i}</h4>
+                        <p class="placa">${veiculo.placa}</p>
+                        <p class="tempo">${formatarDuracao(tempoEstacionado)}</p>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <h4>Vaga C${i}</h4>
+                        <p>Livre</p>
+                    `;
+                }
+                vagasCarroGrid.appendChild(div);
+            }
+
+            // Renderizar vagas de motos
+            vagasMotoGrid.innerHTML = '';
+            for (let i = 1; i <= vagasMotoTotal; i++) {
+                const vagaId = `moto-${i}`;
+                const veiculo = veiculosEstacionados.find(v => v.vaga === vagaId);
+                const div = document.createElement('div');
+                div.className = `vaga-card ${veiculo ? 'ocupada' : 'livre'}`;
+                
+                if (veiculo) {
+                    const tempoEstacionado = (new Date() - new Date(veiculo.entrada)) / (1000 * 60 * 60);
+                    div.innerHTML = `
+                        <h4>Vaga M${i}</h4>
+                        <p class="placa">${veiculo.placa}</p>
+                        <p class="tempo">${formatarDuracao(tempoEstacionado)}</p>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <h4>Vaga M${i}</h4>
+                        <p>Livre</p>
+                    `;
+                }
+                vagasMotoGrid.appendChild(div);
+            }
+        };
+
+        const renderConfiguracoes = () => {
+            document.getElementById('vagas-carro').value = vagasCarroTotal;
+            document.getElementById('vagas-moto').value = vagasMotoTotal;
+            document.getElementById('carro-primeira-hora').value = carroPrecoPrimeiraHora;
+            document.getElementById('carro-hora-adicional').value = carroPrecoHoraAdicional;
+            document.getElementById('moto-primeira-hora').value = motoPrecoPrimeiraHora;
+            document.getElementById('moto-hora-adicional').value = motoPrecoHoraAdicional;
+            document.getElementById('juros-mensalista-diario').value = jurosMensalistaDiario;
+            renderUsuarios();
+        };
+
+        const renderCaixa = () => {
+            caixaStatusText.textContent = caixaAberto ? 'Caixa Aberto' : 'Caixa Fechado';
+            caixaStatusText.style.color = caixaAberto ? 'var(--cor-sucesso)' : 'var(--cor-erro)';
+            
+            abrirCaixaBtn.style.display = caixaAberto ? 'none' : 'inline-block';
+            fecharCaixaBtn.style.display = caixaAberto ? 'inline-block' : 'none';
+            adicionarItemCaixaSection.style.display = caixaAberto ? 'block' : 'none';
+            
+            funcionarioCaixaDisplay.textContent = funcionarioCaixa || '-';
+            valorInicialDisplay.textContent = formatarMoeda(caixaValorInicial);
+            caixaTotalDisplay.textContent = formatarMoeda(caixaTotal);
+            
+            caixaItensList.innerHTML = '';
+            caixaItens.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'caixa-item';
+                li.innerHTML = `
+                    <span>${item.descricao} (${item.metodo}) - ${formatarData(item.data)}</span>
+                    <span class="caixa-item-valor">${formatarMoeda(item.valor)}</span>
+                `;
+                caixaItensList.appendChild(li);
+            });
+        };
+
+        const renderClientesMensalistas = () => {
+            mensalistasTableBody.innerHTML = '';
+            clientesMensalistas.forEach(cliente => {
+                const hoje = new Date();
+                const vencimento = new Date(cliente.dataVencimento);
+                const status = vencimento < hoje ? 'Em Atraso' : 'Em Dia';
+                const statusClass = status === 'Em Atraso' ? 'status-error' : 'status-success';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.tipoVeiculo}</td>
+                    <td>${cliente.placa}</td>
+                    <td>${cliente.telefone || '-'}</td>
+                    <td>${formatarMoeda(cliente.valorMensal)}</td>
+                    <td>${formatarDataCurta(cliente.dataVencimento)}</td>
+                    <td><span class="${statusClass}">${status}</span></td>
+                    <td>
+                        <button class="btn" onclick="abrirModalPagamentoMensalista(${cliente.id})" style="background-color: var(--cor-principal); width: auto; margin-right: 5px; padding: 8px;">Pagar</button>
+                        <button class="btn" onclick="excluirMensalista(${cliente.id})" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>
+                    </td>
+                `;
+                mensalistasTableBody.appendChild(tr);
+            });
+        };
+
+        const renderFinancialSummary = () => {
+            const selectedPeriod = relatorioPeriodoSelect.value;
+            const filteredCaixaItens = filterItemsByPeriod(caixaItens, selectedPeriod, 'data');
+
+            let totalFaturamento = 0;
+            let totalEstacionamento = 0;
+            let totalExtras = 0;
+            let totalMensalistas = 0;
+            let totalVendasProdutos = 0;
+            let totalContasPagas = 0;
+            let totalFornecedores = 0;
+            let totalSalarios = 0;
+            let totalVales = 0;
+
+            let estacionamentoMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let extrasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let mensalistasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let vendasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let contasPagasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let fornecedoresMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let salariosMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let valesMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+
+            filteredCaixaItens.forEach(item => {
+                const metodo = item.metodo || 'Dinheiro';
+                if (item.type === 'estacionamento') {
+                    totalEstacionamento += item.valor;
+                    estacionamentoMetodo[metodo] += item.valor;
+                } else if (item.type === 'receita_extra') {
+                    totalExtras += item.valor;
+                    extrasMetodo[metodo] += item.valor;
+                } else if (item.type === 'pagamento_mensalista') {
+                    totalMensalistas += item.valor;
+                    mensalistasMetodo[metodo] += item.valor;
+                } else if (item.type === 'venda_produto') {
+                    totalVendasProdutos += item.valor;
+                    vendasMetodo[metodo] += item.valor;
+                } else if (item.type === 'conta_pagar_paga') {
+                    totalContasPagas += Math.abs(item.valor);
+                    contasPagasMetodo[metodo] += Math.abs(item.valor);
+                } else if (item.type === 'pagamento_fornecedor') {
+                    totalFornecedores += Math.abs(item.valor);
+                    fornecedoresMetodo[metodo] += Math.abs(item.valor);
+                } else if (item.type === 'pagamento_salario') {
+                    totalSalarios += Math.abs(item.valor);
+                    salariosMetodo[metodo] += Math.abs(item.valor);
+                } else if (item.type === 'vale') {
+                    totalVales += Math.abs(item.valor);
+                    valesMetodo[metodo] += Math.abs(item.valor);
+                }
+            });
+
+            totalFaturamento = totalEstacionamento + totalExtras + totalMensalistas + totalVendasProdutos;
+
+            // Atualizar elementos de receitas
+            faturamentoTotalDia.textContent = formatarMoeda(totalFaturamento);
+            receitasEstacionamento.textContent = formatarMoeda(totalEstacionamento);
+            receitasExtrasCaixa.textContent = formatarMoeda(totalExtras);
+            receitasMensalistas.textContent = formatarMoeda(totalMensalistas);
+            receitasVendasProdutos.textContent = formatarMoeda(totalVendasProdutos);
+
+            // Atualizar detalhes por método de pagamento (Receitas)
+            estacionamentoDinheiro.textContent = formatarMoeda(estacionamentoMetodo.Dinheiro);
+            estacionamentoCartao.textContent = formatarMoeda(estacionamentoMetodo.Cartão);
+            estacionamentoPix.textContent = formatarMoeda(estacionamentoMetodo.Pix);
+            extrasDinheiro.textContent = formatarMoeda(extrasMetodo.Dinheiro);
+            extrasCartao.textContent = formatarMoeda(extrasMetodo.Cartão);
+            extrasPix.textContent = formatarMoeda(extrasMetodo.Pix);
+            mensalistasDinheiro.textContent = formatarMoeda(mensalistasMetodo.Dinheiro);
+            mensalistasCartao.textContent = formatarMoeda(mensalistasMetodo.Cartão);
+            mensalistasPix.textContent = formatarMoeda(mensalistasMetodo.Pix);
+            vendasDinheiro.textContent = formatarMoeda(vendasMetodo.Dinheiro);
+            vendasCartao.textContent = formatarMoeda(vendasMetodo.Cartão);
+            vendasPix.textContent = formatarMoeda(vendasMetodo.Pix);
+
+            // Atualizar elementos de despesas
+            despesasContasPagas.textContent = formatarMoeda(totalContasPagas);
+            contasPagasDinheiro.textContent = formatarMoeda(contasPagasMetodo.Dinheiro);
+            contasPagasCartao.textContent = formatarMoeda(contasPagasMetodo.Cartão);
+            contasPagasPix.textContent = formatarMoeda(contasPagasMetodo.Pix);
+
+            despesasFornecedores.textContent = formatarMoeda(totalFornecedores);
+            fornecedoresDinheiro.textContent = formatarMoeda(fornecedoresMetodo.Dinheiro);
+            fornecedoresCartao.textContent = formatarMoeda(fornecedoresMetodo.Cartão);
+            fornecedoresPix.textContent = formatarMoeda(fornecedoresMetodo.Pix);
+
+            despesasSalarios.textContent = formatarMoeda(totalSalarios);
+            salariosDinheiro.textContent = formatarMoeda(salariosMetodo.Dinheiro);
+            salariosCartao.textContent = formatarMoeda(salariosMetodo.Cartão);
+            salariosPix.textContent = formatarMoeda(salariosMetodo.Pix);
+
+            despesasVales.textContent = formatarMoeda(totalVales);
+            valesDinheiro.textContent = formatarMoeda(valesMetodo.Dinheiro);
+            valesCartao.textContent = formatarMoeda(valesMetodo.Cartão);
+            valesPix.textContent = formatarMoeda(valesMetodo.Pix);
+        };
+
+        const excluirMensalista = (clienteId) => {
+            showCustomConfirm('Tem certeza que deseja excluir este cliente mensalista?', 'Confirmar Exclusão', (confirmed) => {
+                if (confirmed) {
+                    clientesMensalistas = clientesMensalistas.filter(c => c.id !== clienteId);
+                    salvarDados();
+                    updateUI();
+                    showStatusMessage('Cliente mensalista excluído com sucesso!', true, 'mensalista-status-message');
+                }
+            });
+        };
+
+        const excluirProduto = (productId) => {
+            produtos = produtos.filter(p => p.id !== productId);
+            salvarDados();
+            renderProdutos();
+            showStatusMessage('Produto excluído com sucesso!', true, 'produto-status-message');
+        };
+
+        const adicionarProdutoAoCarrinho = () => {
+            const produtoId = parseInt(vendaProdutoSelect.value);
+            const quantidade = parseInt(vendaQuantidadeInput.value);
+
+            if (!produtoId || quantidade <= 0) {
+                showStatusMessage('Selecione um produto e uma quantidade válida.', false, 'venda-status-message');
+                return;
+            }
+
+            const produto = produtos.find(p => p.id === produtoId);
+            if (!produto) {
+                showStatusMessage('Produto não encontrado.', false, 'venda-status-message');
+                return;
+            }
+
+            const itemExistente = carrinhoVendas.find(item => item.id === produtoId);
+            if (itemExistente) {
+                itemExistente.quantidade += quantidade;
+                itemExistente.total = itemExistente.quantidade * produto.precoVenda;
+            } else {
+                carrinhoVendas.push({
+                    id: produtoId,
+                    nome: produto.nome,
+                    categoria: produto.categoria,
+                    precoVenda: produto.precoVenda,
+                    quantidade: quantidade,
+                    total: quantidade * produto.precoVenda
+                });
+            }
+
+            renderCarrinho();
+            vendaProdutoSelect.value = '';
+            vendaQuantidadeInput.value = 1;
+            showStatusMessage('Produto adicionado ao carrinho!', true, 'venda-status-message');
+        };
+
+        const openVendaPagamentoModal = (totalVenda) => {
+            vendaParaFinalizar = {
+                carrinho: [...carrinhoVendas],
+                total: totalVenda
+            };
+            vendaValorTotalModal.textContent = formatarMoeda(totalVenda);
+            vendaTrocoContainer.style.display = 'none';
+            vendaTrocoError.style.display = 'none';
+            vendaPagamentoModal.style.display = 'flex';
+        };
+
+        const fecharVendaPagamentoModal = () => {
+            vendaPagamentoModal.style.display = 'none';
+            vendaParaFinalizar = { carrinho: [], total: 0 };
+        };
+
+        const finalizeSaleProcess = async (metodoPagamento) => {
+            if (!caixaAberto) {
+                showCustomAlert('O caixa precisa estar aberto para finalizar vendas.', 'Erro');
+                return;
+            }
+
+            const now = new Date();
+            vendaParaFinalizar.carrinho.forEach(item => {
+                vendasProdutos.push({
+                    nomeProduto: item.nome,
+                    categoria: item.categoria,
+                    quantidade: item.quantidade,
+                    valorTotal: item.total,
+                    data: now.toISOString()
+                });
+            });
+
+            caixaItens.push({
+                descricao: `Venda de produtos - ${vendaParaFinalizar.carrinho.length} item(s)`,
+                valor: vendaParaFinalizar.total,
+                metodo: metodoPagamento,
+                data: now.toISOString(),
+                type: 'venda_produto'
+            });
+            caixaTotal += vendaParaFinalizar.total;
+
+            // Gerar comprovante de venda
+            await gerarComprovanteVendaPDF(vendaParaFinalizar, metodoPagamento);
+
+            carrinhoVendas = [];
+            fecharVendaPagamentoModal();
+            salvarDados();
+            updateUI();
+            showStatusMessage('Venda finalizada com sucesso!', true, 'venda-status-message');
+        };
+
+        const gerarComprovanteVendaPDF = async (venda, metodoPagamento) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const now = new Date();
+
+            const itensListHTML = venda.carrinho.map(item => `
+                <div class="recibo-item">
+                    <span>${item.nome} (${item.quantidade}x)</span>
+                    <span>${formatarMoeda(item.total)}</span>
+                </div>
+            `).join('');
+
+            const comprovanteHTML = `
+                <div class="recibo-container" style="font-family: 'monospace'; font-size: 12px; line-height: 1.4; color: #333; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box;">
+                    <div class="recibo-header" style="text-align: center; margin-bottom: 15px;">
+                        <h3>COMPROVANTE DE VENDA</h3>
+                        <p>TM Estacionamento Web</p>
+                        <p>Data e Hora: ${formatarData(now.toISOString())}</p>
+                    </div>
+                    <div class="recibo-body" style="border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 10px 0; margin-bottom: 15px;">
+                        ${itensListHTML}
+                        <div class="recibo-total" style="font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; margin-top: 10px;">
+                            <span>Total:</span>
+                            <span>${formatarMoeda(venda.total)}</span>
+                        </div>
+                        <div class="recibo-item" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Método de Pagamento:</span>
+                            <span>${metodoPagamento}</span>
+                        </div>
+                    </div>
+                    <div class="recibo-footer" style="text-align: center; margin-bottom: 15px;">
+                        <p>Obrigado pela preferência!</p>
+                    </div>
+                </div>
+            `;
+
+            comprovanteVendaPdfContent.innerHTML = comprovanteHTML;
+            comprovanteVendaPdfContent.style.display = 'block';
+
+            const canvas = await html2canvas(comprovanteVendaPdfContent, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            doc.save(`comprovante_venda_${new Date().toISOString().slice(0, 10)}_${new Date().toTimeString().slice(0, 8).replace(/:/g, '')}.pdf`);
+            comprovanteVendaPdfContent.style.display = 'none';
+        };
+
+        const renderProdutos = () => {
+            produtosTableBody.innerHTML = '';
+            vendaProdutoSelect.innerHTML = '<option value="">Selecione um Produto</option>';
+
+            produtos.forEach(produto => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${produto.nome}</td>
+                    <td>${produto.categoria}</td>
+                    <td>${formatarMoeda(produto.precoCusto)}</td>
+                    <td>${formatarMoeda(produto.precoVenda)}</td>
+                    <td>
+                        <button class="btn btn-excluir-produto" data-id="${produto.id}" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>
+                    </td>
+                `;
+                produtosTableBody.appendChild(tr);
+
+                const option = document.createElement('option');
+                option.value = produto.id;
+                option.textContent = `${produto.nome} (${formatarMoeda(produto.precoVenda)})`;
+                vendaProdutoSelect.appendChild(option);
+            });
+
+            document.querySelectorAll('.btn-excluir-produto').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    excluirProduto(productId);
+                });
+            });
+        };
+
+        const renderCarrinho = () => {
+            carrinhoList.innerHTML = '';
+            let totalCarrinho = 0;
+            carrinhoVendas.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'caixa-item';
+                li.innerHTML = `
+                    <span>${item.nome} (x${item.quantidade})</span>
+                    <span class="caixa-item-valor">${formatarMoeda(item.total)}</span>
+                `;
+                carrinhoList.appendChild(li);
+                totalCarrinho += item.total;
+            });
+            carrinhoTotalValor.textContent = formatarMoeda(totalCarrinho);
+        };
+        
+        const renderFinanceiro = () => {
+            // Contas a Pagar
+            contasPagarTableBody.innerHTML = '';
+            contasAPagar.forEach(conta => {
+                const tr = document.createElement('tr');
+                const statusClass = conta.status === 'Paga' ? 'status-success' : 'status-error';
+                tr.innerHTML = `
+                    <td>${conta.descricao}</td>
+                    <td>${conta.categoria}</td>
+                    <td>${formatarMoeda(conta.valor)}</td>
+                    <td>${formatarDataCurta(conta.vencimento)}</td>
+                    <td><span class="${statusClass}">${conta.status}</span></td>
+                    <td>
+                        ${conta.status === 'Pendente' ? `<button class="btn btn-pagar-conta" data-id="${conta.id}" style="background-color: var(--cor-principal); width: auto; margin-right: 5px; padding: 8px;">Pagar</button>` : ''}
+                        <button class="btn btn-excluir-conta" data-id="${conta.id}" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>
+                    </td>
+                `;
+                contasPagarTableBody.appendChild(tr);
+            });
+
+            document.querySelectorAll('.btn-pagar-conta').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const contaId = parseInt(e.target.getAttribute('data-id'));
+                    showCustomConfirm('Deseja marcar esta conta como paga?', 'Confirmar Pagamento', (confirmed) => {
+                        if (confirmed) {
+                            marcarContaPaga(contaId);
+                        }
+                    });
+                });
+            });
+            document.querySelectorAll('.btn-excluir-conta').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const contaId = parseInt(e.target.getAttribute('data-id'));
+                    showCustomConfirm('Tem certeza que deseja excluir esta conta?', 'Confirmar Exclusão', (confirmed) => {
+                        if (confirmed) {
+                            excluirConta(contaId);
+                        }
+                    });
+                });
+            });
+
+            // Pagamentos a Fornecedores
+            pagamentosFornecedorTableBody.innerHTML = '';
+            pagamentosFornecedores.forEach(pagamento => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${pagamento.fornecedor}</td>
+                    <td>${formatarMoeda(pagamento.valor)}</td>
+                    <td>${pagamento.metodo}</td>
+                    <td>${formatarData(pagamento.data)}</td>
+                    <td>
+                        <button class="btn btn-excluir-pagamento-fornecedor" data-id="${pagamento.id}" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>
+                    </td>
+                `;
+                pagamentosFornecedorTableBody.appendChild(tr);
+            });
+            document.querySelectorAll('.btn-excluir-pagamento-fornecedor').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pagamentoId = parseInt(e.target.getAttribute('data-id'));
+                    showCustomConfirm('Tem certeza que deseja excluir este pagamento?', 'Confirmar Exclusão', (confirmed) => {
+                        if (confirmed) {
+                            excluirPagamentoFornecedor(pagamentoId);
+                        }
+                    });
+                });
+            });
+
+
+            // Pagamentos de Salários
+            pagamentosSalarioTableBody.innerHTML = '';
+            pagamentosSalarios.forEach(pagamento => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${pagamento.funcionario}</td>
+                    <td>${formatarMoeda(pagamento.valor)}</td>
+                    <td>${pagamento.metodo}</td>
+                    <td>${formatarData(pagamento.data)}</td>
+                    <td>
+                        <button class="btn btn-excluir-pagamento-salario" data-id="${pagamento.id}" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>
+                    </td>
+                `;
+                pagamentosSalarioTableBody.appendChild(tr);
+            });
+            document.querySelectorAll('.btn-excluir-pagamento-salario').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pagamentoId = parseInt(e.target.getAttribute('data-id'));
+                    showCustomConfirm('Tem certeza que deseja excluir este pagamento de salário?', 'Confirmar Exclusão', (confirmed) => {
+                        if (confirmed) {
+                            excluirPagamentoSalario(pagamentoId);
+                        }
+                    });
+                });
+            });
+
+            // Vales a Funcionários
+            valesFuncionarioTableBody.innerHTML = '';
+            valesFuncionarios.forEach(vale => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${vale.funcionario}</td>
+                    <td>${formatarMoeda(vale.valor)}</td>
+                    <td>${vale.metodo}</td>
+                    <td>${formatarData(vale.data)}</td>
+                    <td>
+                        <button class="btn btn-excluir-vale" data-id="${vale.id}" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>
+                    </td>
+                `;
+                valesFuncionarioTableBody.appendChild(tr);
+            });
+            document.querySelectorAll('.btn-excluir-vale').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const valeId = parseInt(e.target.getAttribute('data-id'));
+                    showCustomConfirm('Tem certeza que deseja excluir este vale?', 'Confirmar Exclusão', (confirmed) => {
+                        if (confirmed) {
+                            excluirVale(valeId);
+                        }
+                    });
+                });
+            });
+        };
+
+        const renderUsuarios = () => {
+            usuariosTableBody.innerHTML = '';
+            usuarios.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.role === 'admin' ?
+
+
+ 'Administrador' : 'Simples'}</td>
+                    <td>
+                        ${user.role !== 'admin' ? `<button class="btn btn-excluir-usuario" data-username="${user.username}" style="background-color: var(--cor-erro); width: auto; padding: 8px;">Excluir</button>` : ''}
+                    </td>
+                `;
+                usuariosTableBody.appendChild(tr);
+            });
+
+            document.querySelectorAll('.btn-excluir-usuario').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const usernameToDelete = e.target.getAttribute('data-username');
+                    showCustomConfirm(`Tem certeza que deseja excluir o usuário "${usernameToDelete}"?`, 'Confirmar Exclusão de Usuário', (confirmed) => {
+                        if (confirmed) {
+                            excluirUsuario(usernameToDelete);
+                        }
+                    });
+                });
+            });
+        };
+
+        // Funções de Lógica
+        const showStatusMessage = (message, isSuccess, elementId = 'status-message') => {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+            element.className = isSuccess ? 'status-success' : 'status-error';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
+        };
+
+        const calcularCusto = (tipo, entrada, saida) => {
+            const diffMs = new Date(saida) - new Date(entrada);
+            const diffHoras = diffMs / (1000 * 60 * 60);
+
+            let custo;
+            if (tipo === 'Carro') {
+                custo = carroPrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * carroPrecoHoraAdicional);
+            } else { // Moto
+                custo = motoPrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * motoPrecoHoraAdicional);
+            }
+            return { duracao: diffHoras, custo: custo };
+        };
+
+        const calcularJurosMensalista = (dataVencimentoStr, valorMensal) => {
+            const umDia = 1000 * 60 * 60 * 24;
+            const hoje = new Date();
+            const vencimento = new Date(dataVencimentoStr);
+            vencimento.setHours(0, 0, 0, 0);
+
+            hoje.setHours(0, 0, 0, 0);
+
+            let diasAtraso = 0;
+            if (hoje > vencimento) {
+                 diasAtraso = Math.floor((hoje - vencimento) / umDia);
+            }
+
+            const jurosTotal = diasAtraso * (jurosMensalistaDiario / 100) * valorMensal;
+            return { diasAtraso, jurosTotal: jurosTotal };
+        };
+
+
+        const abrirModalCobranca = (placa) => {
+            veiculoParaSaida = veiculosEstacionados.find(v => v.placa === placa);
+            if (!veiculoParaSaida) {
+                showCustomAlert('Veículo não encontrado.');
+                return;
+            }
+
+            const now = new Date();
+            const { duracao, custo } = calcularCusto(veiculoParaSaida.tipo, veiculoParaSaida.entrada, now);
+
+            modalPlaca.textContent = veiculoParaSaida.placa;
+            modalDuracao.textContent = formatarDuracao(duracao);
+            modalCusto.textContent = formatarMoeda(custo);
+            valorRecebidoInput.value = '';
+            trocoValor.textContent = formatarMoeda(0);
+            trocoContainer.style.display = 'none';
+            trocoError.style.display = 'none';
+            
+            cobrancaModal.style.display = 'flex';
+        };
+
+        const fecharModalCobranca = () => {
+            cobrancaModal.style.display = 'none';
+            veiculoParaSaida = null;
+        };
+
+        const finalizarSaida = (custo, metodoPagamento) => {
+            if (!veiculoParaSaida) return;
+            const now = new Date();
+            const { duracao } = calcularCusto(veiculoParaSaida.tipo, veiculoParaSaida.entrada, now);
+            relatoriosHistorico.push({
+                placa: veiculoParaSaida.placa,
+                tipo: veiculoParaSaida.tipo,
+                entrada: veiculoParaSaida.entrada,
+                saida: now.toISOString(),
+                duracao: duracao,
+                custo: custo,
+            });
+            caixaItens.push({
+                descricao: `Pagamento estacionamento - Placa: ${veiculoParaSaida.placa}`,
+                valor: custo,
+                metodo: metodoPagamento,
+                data: now.toISOString(),
+                type: 'estacionamento'
+            });
+            caixaTotal += custo;
+            
+            veiculosEstacionados = veiculosEstacionados.filter(v => v.placa !== veiculoParaSaida.placa);
+            fecharModalCobranca();
+            salvarDados();
+            updateUI();
+            showStatusMessage('Saída de veículo finalizada com sucesso!', true);
+        };
+
+        const abrirModalPagamentoMensalista = (clientId) => {
+            mensalistaParaPagamento = clientesMensalistas.find(c => c.id === clientId);
+            if (!mensalistaParaPagamento) {
+                showCustomAlert('Cliente mensalista não encontrado.');
+                return;
+            }
+
+            const { diasAtraso, jurosTotal } = calcularJurosMensalista(mensalistaParaPagamento.dataVencimento, mensalistaParaPagamento.valorMensal);
+            valorTotalMensalista = mensalistaParaPagamento.valorMensal + jurosTotal;
+
+            mensalistaNomeModal.textContent = mensalistaParaPagamento.nome;
+            mensalistaPlacaModal.textContent = mensalistaParaPagamento.placa;
+            mensalistaValorBaseModal.textContent = formatarMoeda(mensalistaParaPagamento.valorMensal);
+            mensalistaDiasAtrasoModal.textContent = diasAtraso;
+            mensalistaJurosModal.textContent = formatarMoeda(jurosTotal);
+            mensalistaValorTotalModal.textContent = formatarMoeda(valorTotalMensalista);
+
+            mensalistaValorRecebidoInput.value = '';
+            mensalistaTrocoValor.textContent = formatarMoeda(0);
+            mensalistaTrocoContainer.style.display = 'none';
+            mensalistaTrocoError.style.display = 'none';
+            
+            mensalistaPagamentoModal.style.display = 'flex';
+        };
+
+        const fecharModalPagamentoMensalista = () => {
+            mensalistaPagamentoModal.style.display = 'none';
+            mensalistaParaPagamento = null;
+            valorTotalMensalista = 0;
+        };
+
+        const finalizarPagamentoMensalista = (custo, metodoPagamento) => {
+            if (!mensalistaParaPagamento) return;
+            const now = new Date();
+
+            const proximoVencimento = new Date(mensalistaParaPagamento.dataVencimento);
+            proximoVencimento.setMonth(proximoVencimento.getMonth() + 1);
+            mensalistaParaPagamento.dataVencimento = proximoVencimento.toISOString().slice(0, 10);
+
+            caixaItens.push({
+                descricao: `Pagamento Mensal - Cliente: ${mensalistaParaPagamento.nome} (Placa: ${mensalistaParaPagamento.placa})`,
+                valor: custo,
+                metodo: metodoPagamento,
+                data: now.toISOString(),
+                type: 'pagamento_mensalista'
+            });
+            caixaTotal += custo;
+            
+            salvarDados();
+            fecharModalPagamentoMensalista();
+            updateUI();
+            showStatusMessage('Pagamento de mensalista registrado com sucesso!', true, 'mensalista-status-message');
+        };
+
+        const gerarReciboPDF = async (cliente) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const { diasAtraso, jurosTotal } = calcularJurosMensalista(cliente.dataVencimento, cliente.valorMensal);
+            const valorComJuros = cliente.valorMensal + jurosTotal;
+
+            const reciboHTML = `
+                <div class="recibo-container" style="font-family: 'monospace'; font-size: 12px; line-height: 1.4; color: #333; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box;">
+                    <div class="recibo-header" style="text-align: center; margin-bottom: 15px;">
+                        <h3>RECIBO DE PAGAMENTO MENSALISTA</h3>
+                        <p>TM Estacionamento Web</p>
+                        <p>Data de Emissão: ${formatarData(new Date().toISOString())}</p>
+                    </div>
+                    <div class="recibo-detalhes" style="margin-bottom: 15px;">
+                        <p><strong>Cliente:</strong> ${cliente.nome}</p>
+                        <p><strong>Placa:</strong> ${cliente.placa}</p>
+                        <p><strong>Tipo de Veículo:</strong> ${cliente.tipoVeiculo}</p>
+                        <p><strong>Valor Mensal:</strong> ${formatarMoeda(cliente.valorMensal)}</p>
+                        <p><strong>Dias em Atraso:</strong> ${diasAtraso}</p>
+                        <p><strong>Juros:</strong> ${formatarMoeda(jurosTotal)}</p>
+                    </div>
+                    <div class="recibo-body" style="border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 10px 0; margin-bottom: 15px;">
+                        <div class="recibo-total" style="font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; margin-top: 10px;">
+                            <span>Total Pago:</span>
+                            <span>${formatarMoeda(valorComJuros)}</span>
+                        </div>
+                    </div>
+                    <div class="recibo-footer" style="text-align: center; margin-bottom: 15px;">
+                        <p>Obrigado pelo pagamento!</p>
+                    </div>
+                </div>
+            `;
+
+            reciboPdfContent.innerHTML = reciboHTML;
+            reciboPdfContent.style.display = 'block';
+
+            const canvas = await html2canvas(reciboPdfContent, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            doc.save(`recibo_mensalista_${cliente.nome.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`);
+            showCustomAlert('Recibo PDF gerado com sucesso!', 'Sucesso');
+
+            reciboPdfContent.style.display = 'none';
+        };
+
+        const gerarRelatorioFinanceiroPDF = async () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const selectedPeriod = relatorioPeriodoSelect.value;
+            let reportTitle = '';
+            let periodText = '';
+
+            switch(selectedPeriod) {
+                case 'diario':
+                    reportTitle = 'RELATÓRIO FINANCEIRO DIÁRIO';
+                    periodText = `Data do Relatório: ${new Date().toLocaleDateString('pt-BR')}`;
+                    break;
+                case 'semanal':
+                    reportTitle = 'RELATÓRIO FINANCEIRO SEMANAL';
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    periodText = `Período: ${oneWeekAgo.toLocaleDateString('pt-BR')} - ${new Date().toLocaleDateString('pt-BR')}`;
+                    break;
+                case 'mensal':
+                    reportTitle = 'RELATÓRIO FINANCEIRO MENSAL';
+                    periodText = `Mês: ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
+                    break;
+                case 'total':
+                    reportTitle = 'RELATÓRIO FINANCEIRO GERAL';
+                    periodText = 'Período: Desde o Início';
+                    break;
+                default:
+                    reportTitle = 'RELATÓRIO FINANCEIRO';
+                    periodText = '';
+            }
+
+            const filteredCaixaItens = filterItemsByPeriod(caixaItens, selectedPeriod, 'data');
+
+            let totalFaturamento = 0;
+            let totalEstacionamento = 0;
+            let totalExtras = 0;
+            let totalMensalistas = 0;
+            let totalVendasProdutos = 0;
+            let totalContasPagas = 0;
+            let totalFornecedores = 0;
+            let totalSalarios = 0;
+            let totalVales = 0;
+
+            let estacionamentoMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let extrasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let mensalistasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let vendasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let contasPagasMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let fornecedoresMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let salariosMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+            let valesMetodo = { Dinheiro: 0, Cartão: 0, Pix: 0 };
+
+            filteredCaixaItens.forEach(item => {
+                const metodo = item.metodo || 'Dinheiro';
+                if (item.type === 'estacionamento') {
+                    totalEstacionamento += item.valor;
+                    estacionamentoMetodo[metodo] += item.valor;
+                } else if (item.type === 'receita_extra') {
+                    totalExtras += item.valor;
+                    extrasMetodo[metodo] += item.valor;
+                } else if (item.type === 'pagamento_mensalista') {
+                    totalMensalistas += item.valor;
+                    mensalistasMetodo[metodo] += item.valor;
+                } else if (item.type === 'venda_produto') {
+                    totalVendasProdutos += item.valor;
+                    vendasMetodo[metodo] += item.valor;
+                } else if (item.type === 'conta_pagar_paga') {
+                    totalContasPagas += Math.abs(item.valor);
+                    contasPagasMetodo[metodo] += Math.abs(item.valor);
+                } else if (item.type === 'pagamento_fornecedor') {
+                    totalFornecedores += Math.abs(item.valor);
+                    fornecedoresMetodo[metodo] += Math.abs(item.valor);
+                } else if (item.type === 'pagamento_salario') {
+                    totalSalarios += Math.abs(item.valor);
+                    salariosMetodo[metodo] += Math.abs(item.valor);
+                } else if (item.type === 'vale') {
+                    totalVales += Math.abs(item.valor);
+                    valesMetodo[metodo] += Math.abs(item.valor);
+                }
+            });
+            totalFaturamento = totalEstacionamento + totalExtras + totalMensalistas + totalVendasProdutos;
+            const totalDespesas = totalContasPagas + totalFornecedores + totalSalarios + totalVales;
+            const saldoFinal = totalFaturamento - totalDespesas;
+
+
+            const relatorioHTML = `
+                <div class="recibo-container" style="font-family: 'monospace'; font-size: 12px; line-height: 1.4; color: #333; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box;">
+                    <div class="recibo-header" style="text-align: center; margin-bottom: 15px;">
+                        <h3>${reportTitle}</h3>
+                        <p>TM Estacionamento Web</p>
+                        <p>${periodText}</p>
+                        <div class="recibo-total" style="font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; margin-top: 10px;">
+                            <span>Faturamento Total do Período:</span>
+                            <span>${formatarMoeda(totalFaturamento)}</span>
+                        </div>
+                        <div class="recibo-total" style="font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; margin-top: 5px;">
+                            <span>Despesas Totais do Período:</span>
+                            <span style="color: var(--cor-erro);">${formatarMoeda(totalDespesas)}</span>
+                        </div>
+                        <div class="recibo-total" style="font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; margin-top: 15px;">
+                            <span>Saldo Final:</span>
+                            <span style="color: ${saldoFinal >= 0 ? 'var(--cor-sucesso)' : 'var(--cor-erro)'}">${formatarMoeda(saldoFinal)}</span>
+                        </div>
+                    </div>
+                    <div class="recibo-body" style="border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 10px 0; margin-bottom: 15px;">
+                        
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Receitas de Estacionamento: ${formatarMoeda(totalEstacionamento)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(estacionamentoMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(estacionamentoMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(estacionamentoMetodo.Pix)}</p>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Receitas Extras do Caixa: ${formatarMoeda(totalExtras)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(extrasMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(extrasMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(extrasMetodo.Pix)}</p>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Receitas de Mensalistas: ${formatarMoeda(totalMensalistas)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(mensalistasMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(mensalistasMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(mensalistasMetodo.Pix)}</p>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Receitas de Vendas de Produtos: ${formatarMoeda(totalVendasProdutos)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(vendasMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(vendasMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(vendasMetodo.Pix)}</p>
+
+                        <h3 style="margin-top: 20px;">Despesas</h3>
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Contas Pagas: ${formatarMoeda(totalContasPagas)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(contasPagasMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(contasPagasMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(contasPagasMetodo.Pix)}</p>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Pagamentos a Fornecedores: ${formatarMoeda(totalFornecedores)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(fornecedoresMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(fornecedoresMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(fornecedoresMetodo.Pix)}</p>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Pagamentos de Salários: ${formatarMoeda(totalSalarios)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(salariosMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(salariosMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(salariosMetodo.Pix)}</p>
+
+                        <h4 style="margin-top: 10px; margin-bottom: 5px;">Vales a Funcionários: ${formatarMoeda(totalVales)}</h4>
+                        <p style="margin-left: 10px;">- Dinheiro: ${formatarMoeda(valesMetodo.Dinheiro)}</p>
+                        <p style="margin-left: 10px;">- Cartão: ${formatarMoeda(valesMetodo.Cartão)}</p>
+                        <p style="margin-left: 10px;">- Pix: ${formatarMoeda(valesMetodo.Pix)}</p>
+                    </div>
+                    <div class="recibo-footer" style="text-align: center; margin-bottom: 15px;">
+                        <p>Relatório gerado automaticamente.</p>
+                    </div>
+                </div>
+            `;
+
+            relatorioFinanceiroPdfContent.innerHTML = relatorioHTML;
+            relatorioFinanceiroPdfContent.style.display = 'block'; 
+
+            const canvas = await html2canvas(relatorioFinanceiroPdfContent, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            doc.save(`relatorio_financeiro_${selectedPeriod}_${new Date().toISOString().slice(0, 10)}.pdf`);
+            showCustomAlert('Relatório Financeiro PDF gerado com sucesso!', 'Sucesso');
+
+            relatorioFinanceiroPdfContent.style.display = 'none';
+        };
+
+        const gerarRelatorioVendasProdutosPDF = async () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const selectedPeriod = relatorioPeriodoSelect.value;
+            let reportTitle = 'RELATÓRIO DE VENDAS DE PRODUTOS';
+            let periodText = '';
+
+            switch(selectedPeriod) {
+                case 'diario':
+                    periodText = `Data do Relatório: ${new Date().toLocaleDateString('pt-BR')}`;
+                    break;
+                case 'semanal':
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                    periodText = `Período: ${oneWeekAgo.toLocaleDateString('pt-BR')} - ${new Date().toLocaleDateString('pt-BR')}`;
+                    break;
+                case 'mensal':
+                    periodText = `Mês: ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`;
+                    break;
+                case 'total':
+                    periodText = 'Período: Desde o Início';
+                    break;
+                default:
+                    periodText = '';
+            }
+
+            const filteredVendas = filterItemsByPeriod(vendasProdutos, selectedPeriod, 'data');
+            let totalValorVendas = 0;
+            const vendasListHTML = filteredVendas.map(venda => {
+                totalValorVendas += venda.valorTotal;
+                return `
+                    <div class="recibo-item">
+                        <span>${venda.nomeProduto} (${venda.quantidade}x) - ${venda.categoria}</span>
+                        <span>${formatarMoeda(venda.valorTotal)} - ${formatarData(venda.data)}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const relatorioHTML = `
+                <div class="recibo-container" style="font-family: 'monospace'; font-size: 12px; line-height: 1.4; color: #333; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box;">
+                    <div class="recibo-header" style="text-align: center; margin-bottom: 15px;">
+                        <h3>${reportTitle}</h3>
+                        <p>TM Estacionamento Web</p>
+                        <p>${periodText}</p>
+                    </div>
+                    <div class="recibo-body" style="border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 10px 0; margin-bottom: 15px;">
+                        ${vendasListHTML}
+                        <div class="recibo-total" style="font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; margin-top: 10px;">
+                            <span>Total de Vendas:</span>
+                            <span>${formatarMoeda(totalValorVendas)}</span>
+                        </div>
+                    </div>
+                    <div class="recibo-footer" style="text-align: center; margin-bottom: 15px;">
+                        <p>Relatório gerado automaticamente.</p>
+                    </div>
+                </div>
+            `;
+
+            relatorioVendasProdutosPdfContent.innerHTML = relatorioHTML;
+            relatorioVendasProdutosPdfContent.style.display = 'block';
+
+            const canvas = await html2canvas(relatorioVendasProdutosPdfContent, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            doc.save(`relatorio_vendas_produtos_${selectedPeriod}_${new Date().toISOString().slice(0, 10)}.pdf`);
+            showCustomAlert('Relatório de Vendas de Produtos PDF gerado com sucesso!', 'Sucesso');
+
+            relatorioVendasProdutosPdfContent.style.display = 'none';
+        };
+
+
+        const gerarComprovanteEntradaPDF = async (veiculo) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const now = new Date();
+
+            const comprovanteHTML = `
+                <div class="recibo-container" style="font-family: 'monospace'; font-size: 12px; line-height: 1.4; color: #333; width: 100%; max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box;">
+                    <div class="recibo-header" style="text-align: center; margin-bottom: 15px;">
+                        <h3>COMPROVANTE DE ENTRADA</h3>
+                        <p>TM Estacionamento Web</p>
+                        <p>Data e Hora de Emissão: ${formatarData(now.toISOString())}</p>
+                    </div>
+                    <div class="recibo-detalhes" style="margin-bottom: 15px;">
+                        <p><strong>Placa do Veículo:</strong> ${veiculo.placa}</p>
+                        <p><strong>Tipo de Veículo:</strong> ${veiculo.tipo}</p>
+                        <p><strong>Vaga:</strong> ${veiculo.vaga}</p>
+                        <p><strong>Data e Hora de Entrada:</strong> ${formatarData(veiculo.entrada)}</p>
+                    </div>
+                    <div class="recibo-body" style="border-top: 1px dashed #999; border-bottom: 1px dashed #999; padding: 10px 0; margin-bottom: 15px;">
+                        <p><strong>Preços:</strong></p>
+                        <p>1ª Hora: ${formatarMoeda(veiculo.tipo === 'Carro' ? carroPrecoPrimeiraHora : motoPrecoPrimeiraHora)}</p>
+                        <p>Horas Adicionais: ${formatarMoeda(veiculo.tipo === 'Carro' ? carroPrecoHoraAdicional : motoPrecoHoraAdicional)}</p>
+                    </div>
+                    <div class="recibo-footer" style="text-align: center; margin-bottom: 15px;">
+                        <p>Guarde este comprovante!</p>
+                        <p>Apresente na saída para pagamento.</p>
+                    </div>
+                </div>
+            `;
+
+            comprovanteEntradaPdfContent.innerHTML = comprovanteHTML;
+            comprovanteEntradaPdfContent.style.display = 'block';
+
+            const canvas = await html2canvas(comprovanteEntradaPdfContent, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190;
+            const pageHeight = 295;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                doc.addPage();
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            doc.save(`comprovante_entrada_${veiculo.placa}_${new Date().toISOString().slice(0, 10)}_${new Date().toTimeString().slice(0, 8).replace(/:/g, '')}.pdf`);
+            comprovanteEntradaPdfContent.style.display = 'none';
+        };
+
+        // Funções para a seção Financeiro
+        const marcarContaPaga = (contaId) => {
+            const contaIndex = contasAPagar.findIndex(c => c.id === contaId);
+            if (contaIndex > -1) {
+                const conta = contasAPagar[contaIndex];
+                if (!caixaAberto) {
+                    showCustomAlert('O caixa precisa estar aberto para registrar pagamentos.', 'Erro', 'financeiro-status-message');
+                    return;
+                }
+                caixaItens.push({
+                    descricao: `Pagamento de conta: ${conta.descricao} (${conta.categoria})`,
+                    valor: -conta.valor, // Valor negativo para despesa
+                    metodo: 'Dinheiro', // Assumindo Dinheiro para contas a pagar, pode ser expandido
+                    data: new Date().toISOString(),
+                    type: 'conta_pagar_paga'
+                });
+                caixaTotal -= conta.valor; // Deduzir do caixa
+                conta.status = 'Paga';
+                salvarDados();
+                updateUI();
+                showStatusMessage('Conta marcada como paga com sucesso!', true, 'financeiro-status-message');
+            }
+        };
+
+        const excluirConta = (contaId) => {
+            contasAPagar = contasAPagar.filter(c => c.id !== contaId);
+            salvarDados();
+            updateUI();
+            showStatusMessage('Conta excluída com sucesso!', true, 'financeiro-status-message');
+        };
+
+        const excluirPagamentoFornecedor = (pagamentoId) => {
+            const pagamentoIndex = pagamentosFornecedores.findIndex(p => p.id === pagamentoId);
+            if (pagamentoIndex > -1) {
+                const pagamento = pagamentosFornecedores[pagamentoIndex];
+                // Remover o item correspondente do caixa
+                caixaItens = caixaItens.filter(item => !(item.type === 'pagamento_fornecedor' && item.valor === -pagamento.valor && item.metodo === pagamento.metodo && item.data === pagamento.data));
+                caixaTotal += pagamento.valor; // Reembolsar o valor no caixa
+                pagamentosFornecedores = pagamentosFornecedores.filter(p => p.id !== pagamentoId);
+                salvarDados();
+                updateUI();
+                showStatusMessage('Pagamento a fornecedor excluído com sucesso!', true, 'financeiro-status-message');
+            }
+        };
+
+        const excluirPagamentoSalario = (pagamentoId) => {
+            const pagamentoIndex = pagamentosSalarios.findIndex(p => p.id === pagamentoId);
+            if (pagamentoIndex > -1) {
+                const pagamento = pagamentosSalarios[pagamentoIndex];
+                caixaItens = caixaItens.filter(item => !(item.type === 'pagamento_salario' && item.valor === -pagamento.valor && item.metodo === pagamento.metodo && item.data === pagamento.data));
+                caixaTotal += pagamento.valor;
+                pagamentosSalarios = pagamentosSalarios.filter(p => p.id !== pagamentoId);
+                salvarDados();
+                updateUI();
+                showStatusMessage('Pagamento de salário excluído com sucesso!', true, 'financeiro-status-message');
+            }
+        };
+
+        const excluirVale = (valeId) => {
+            const valeIndex = valesFuncionarios.findIndex(v => v.id === valeId);
+            if (valeIndex > -1) {
+                const vale = valesFuncionarios[valeIndex];
+                caixaItens = caixaItens.filter(item => !(item.type === 'vale' && item.valor === -vale.valor && item.metodo === vale.metodo && item.data === vale.data));
+                caixaTotal += vale.valor;
+                valesFuncionarios = valesFuncionarios.filter(v => v.id !== valeId);
+                salvarDados();
+                updateUI();
+                showStatusMessage('Vale excluído com sucesso!', true, 'financeiro-status-message');
+            }
+        };
+
+        const adicionarUsuario = (username, password, role = 'simples') => {
+            // Verificar se o username já existe
+            if (usuarios.some(user => user.username === username)) {
+                showStatusMessage('Nome de usuário já existe.', false, 'usuario-status-message');
+                return false;
+            }
+            usuarios.push({ username, password, role });
+            salvarDados();
+            renderUsuarios();
+            showStatusMessage(`Usuário "${username}" cadastrado com sucesso!`, true, 'usuario-status-message');
+            return true;
+        };
+
+        const excluirUsuario = (username) => {
+            usuarios = usuarios.filter(user => user.username !== username);
+            salvarDados();
+            renderUsuarios();
+            showStatusMessage(`Usuário "${username}" excluído com sucesso!`, true, 'usuario-status-message');
+        };
+
+        const checkUserAccess = (role, targetSectionId) => {
+            const allowedForSimple = ['dashboard-section', 'vagas-section', 'veiculos-section', 'vendas-section', 'caixa-section', 'clientes-section'];
+            if (role === 'admin') {
+                return true; // Admin tem acesso a todas as seções
+            } else if (role === 'simples') {
+                return allowedForSimple.includes(targetSectionId);
+            }
+            return false; // Outros perfis ou sem perfil não têm acesso
+        };
+
+        const updateUI = () => {
+            renderDashboard();
+            renderVehiclesTable();
+            renderRelatoriosTable();
+            renderVagas();
+            renderConfiguracoes();
+            renderCaixa();
+            renderClientesMensalistas();
+            renderProdutos(); // Renderiza a tabela de produtos e o select de vendas
+            renderCarrinho(); // Renderiza o carrinho de compras
+            renderFinanceiro(); // Renderiza a nova seção financeira
+            renderFinancialSummary();
+            renderSidebarItems(); // Atualiza a visibilidade dos itens da sidebar
+        };
+
+        const renderSidebarItems = () => {
+            sidebarItems.forEach(item => {
+                const targetId = item.getAttribute('data-target');
+                if (currentUser && checkUserAccess(currentUser.role, targetId)) {
+                    item.style.display = 'flex'; // Mostra o item
+                } else {
+                    item.style.display = 'none'; // Esconde o item
+                }
+            });
+        };
+        
+        const logout = () => {
+            showCustomConfirm('Tem certeza que deseja sair?', 'Sair', (confirmed) => {
+                if (confirmed) {
+                    isLoggedIn = false;
+                    currentUser = null;
+                    loginContainer.style.display = 'flex';
+                    mainApp.style.display = 'none';
+                    loginForm.reset();
+                    loginError.style.display = 'none';
+                    loginSuccess.style.display = 'none';
+                    // Esconde todas as seções de conteúdo
+                    contentSections.forEach(section => section.style.display = 'none');
+                    // Remove a classe 'active' de todos os itens da sidebar
+                    sidebarItems.forEach(item => item.classList.remove('active'));
+                    renderSidebarItems(); // Reseta a visibilidade da sidebar para o estado pré-login
+                }
+            });
+        };
+
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarDados();
+            // Se não houver usuários salvos (primeira execução), garante o admin padrão
+            if (usuarios.length === 0) {
+                usuarios.push({ username: 'admin', password: 'admin', role: 'admin' });
+                salvarDados();
+            }
+            updateUI(); // Chama updateUI para garantir a renderização inicial baseada em currentUser
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                const foundUser = usuarios.find(user => user.username === username && user.password === password);
+
+                if (foundUser) {
+                    loginError.style.display = 'none';
+                    loginSuccess.style.display = 'block';
+                    currentUser = foundUser; // Define o usuário logado
+                    
+                    setTimeout(() => {
+                        loginContainer.style.display = 'none';
+                        mainApp.style.display = 'flex';
+                        
+                        // Redireciona para o dashboard ou a primeira seção permitida
+                        let initialSection = 'dashboard-section';
+                        const allowedForSimple = ['dashboard-section', 'vagas-section', 'veiculos-section', 'vendas-section', 'caixa-section', 'clientes-section'];
+
+                        if (currentUser.role === 'simples' && !allowedForSimple.includes(initialSection)) {
+                            initialSection = allowedForSimple[0]; // Pega a primeira seção permitida para usuário simples
+                        }
+                        
+                        document.querySelector(`.sidebar-item[data-target="${initialSection}"]`).classList.add('active');
+                        document.getElementById(initialSection).style.display = 'block';
+                        
+                        isLoggedIn = true;
+                        updateUI(); // Re-renderiza a UI com base no usuário logado
+                    }, 500);
+                } else {
+                    loginSuccess.style.display = 'none';
+                    loginError.style.display = 'block';
+                }
+            });
+
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+            });
+
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = item.getAttribute('data-target');
+                    
+                    if (currentUser && checkUserAccess(currentUser.role, targetId)) {
+                        contentSections.forEach(section => section.style.display = 'none');
+                        document.getElementById(targetId).style.display = 'block';
+
+                        sidebarItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        if (targetId === 'dashboard-section') {
+                            renderDashboard();
+                        } else if (targetId === 'veiculos-section') {
+                            renderVehiclesTable();
+                        } else if (targetId === 'relatorios-section') {
+                            renderRelatoriosTable();
+                            renderFinancialSummary();
+                        } else if (targetId === 'configuracoes-section') {
+                            renderConfiguracoes();
+                        } else if (targetId === 'vagas-section') {
+                            renderVagas();
+                        } else if (targetId === 'caixa-section') {
+                            renderCaixa();
+                        } else if (targetId === 'clientes-section') {
+                            renderClientesMensalistas();
+                        } else if (targetId === 'vendas-section') {
+                            renderProdutos();
+                            renderCarrinho();
+                        } else if (targetId === 'financeiro-section') {
+                            renderFinanceiro();
+                        }
+                    } else {
+                        showCustomAlert('Você não tem permissão para acessar esta seção.', 'Acesso Negado');
+                    }
+                });
+            });
+
+            veiculosForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!caixaAberto) {
+                    showCustomAlert('O caixa precisa estar aberto para registrar a entrada de veículos.', 'Erro');
+                    return;
+                }
+                const placa = document.getElementById('placa').value.toUpperCase().trim();
+                const tipo = document.getElementById('tipo').value;
+                
+                if (veiculosEstacionados.find(v => v.placa === placa)) {
+                    showCustomAlert('Veículo com esta placa já está estacionado.', 'Erro');
+                    return;
+                }
+                
+                let vagaLivre = null;
+                if (tipo === 'Carro') {
+                    const vagasCarroOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Carro').length;
+                    if (vagasCarroOcupadas >= vagasCarroTotal) {
+                        showCustomAlert('Não há vagas disponíveis para carros.', 'Erro');
+                        return;
+                    }
+                    for (let i = 1; i <= vagasCarroTotal; i++) {
+                        if (!veiculosEstacionados.find(v => v.vaga === `carro-${i}`)) {
+                            vagaLivre = `carro-${i}`;
+                            break;
+                        }
+                    }
+                } else {
+                    const vagasMotoOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Moto').length;
+                    if (vagasMotoOcupadas >= vagasMotoTotal) {
+                        showCustomAlert('Não há vagas disponíveis para motos.', 'Erro');
+                        return;
+                    }
+                    for (let i = 1; i <= vagasMotoTotal; i++) {
+                        if (!veiculosEstacionados.find(v => v.vaga === `moto-${i}`)) {
+                            vagaLivre = `moto-${i}`;
+                            break;
+                        }
+                    }
+                }
+                
+                if (vagaLivre) {
+                    const novoVeiculo = {
+                        placa,
+                        tipo,
+                        entrada: new Date().toISOString(),
+                        vaga: vagaLivre
+                    };
+                    veiculosEstacionados.push(novoVeiculo);
+                    e.target.reset();
+                    salvarDados();
+                    updateUI();
+                    showStatusMessage(`Entrada de veículo ${placa} registrada na vaga ${vagaLivre}!`, true);
+                    await gerarComprovanteEntradaPDF(novoVeiculo);
+                } else {
+                    showCustomAlert('Não foi possível encontrar uma vaga livre.', 'Erro');
+                }
+            });
+
+            btnLimparRelatorios.addEventListener('click', () => {
+                showCustomConfirm('Tem certeza que deseja limpar todo o histórico de relatórios?', 'Confirmar Limpeza', (confirmed) => {
+                    if (confirmed) {
+                        relatoriosHistorico = [];
+                        salvarDados();
+                        updateUI();
+                        showStatusMessage('Histórico de relatórios limpo!', true);
+                    }
+                });
+            });
+            
+            pagamentoOpcoes.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const metodo = e.target.getAttribute('data-metodo');
+                    const custo = parseFloat(modalCusto.textContent.replace('R$', '').replace(',', '.'));
+                    
+                    if (metodo === 'Dinheiro') {
+                        trocoContainer.style.display = 'flex';
+                        valorRecebidoInput.value = custo;
+                        trocoValor.textContent = formatarMoeda(0);
+                        trocoError.style.display = 'none';
+                        btnFinalizarDinheiro.disabled = false;
+                    } else {
+                        finalizarSaida(custo, metodo);
+                    }
+                }
+            });
+            valorRecebidoInput.addEventListener('input', () => {
+                const custo = parseFloat(modalCusto.textContent.replace('R$', '').replace(',', '.'));
+                const valorRecebido = parseFloat(valorRecebidoInput.value);
+                if (isNaN(valorRecebido) || valorRecebido < custo) {
+                    trocoValor.textContent = formatarMoeda(0);
+                    trocoError.style.display = 'block';
+                    btnFinalizarDinheiro.disabled = true;
+                } else {
+                    const troco = valorRecebido - custo;
+                    trocoValor.textContent = formatarMoeda(troco);
+                    trocoError.style.display = 'none';
+                    btnFinalizarDinheiro.disabled = false;
+                }
+            });
+
+            btnFinalizarDinheiro.addEventListener('click', () => {
+                const custo = parseFloat(modalCusto.textContent.replace('R$', '').replace(',', '.'));
+                finalizarSaida(custo, 'Dinheiro');
+            });
+
+            cobrancaModal.addEventListener('click', (e) => {
+                if (e.target === cobrancaModal) {
+                    fecharModalCobranca();
+                }
+            });
+
+            // Eventos para mensalistas
+            mensalistaPagamentoOpcoes.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const metodo = e.target.getAttribute('data-metodo');
+                    
+                    if (metodo === 'Dinheiro') {
+                        mensalistaTrocoContainer.style.display = 'flex';
+                        mensalistaValorRecebidoInput.value = valorTotalMensalista.toFixed(2);
+                        mensalistaTrocoValor.textContent = formatarMoeda(0);
+                        mensalistaTrocoError.style.display = 'none';
+                        btnFinalizarMensalistaDinheiro.disabled = false;
+                    } else {
+                        finalizarPagamentoMensalista(valorTotalMensalista, metodo);
+                    }
+                }
+            });
+
+            mensalistaValorRecebidoInput.addEventListener('input', () => {
+                const valorRecebido = parseFloat(mensalistaValorRecebidoInput.value);
+                if (isNaN(valorRecebido) || valorRecebido < valorTotalMensalista) {
+                    mensalistaTrocoValor.textContent = formatarMoeda(0);
+                    mensalistaTrocoError.style.display = 'block';
+                    btnFinalizarMensalistaDinheiro.disabled = true;
+                } else {
+                    const troco = valorRecebido - valorTotalMensalista;
+                    mensalistaTrocoValor.textContent = formatarMoeda(troco);
+                    mensalistaTrocoError.style.display = 'none';
+                    btnFinalizarMensalistaDinheiro.disabled = false;
+                }
+            });
+
+            btnFinalizarMensalistaDinheiro.addEventListener('click', () => {
+                finalizarPagamentoMensalista(valorTotalMensalista, 'Dinheiro');
+            });
+
+            mensalistaPagamentoModal.addEventListener('click', (e) => {
+                if (e.target === mensalistaPagamentoModal) {
+                    fecharModalPagamentoMensalista();
+                }
+            });
+
+            configuracoes.addEventListener('submit', (e) => {
+                e.preventDefault();
+                vagasCarroTotal = parseInt(document.getElementById('vagas-carro').value);
+                vagasMotoTotal = parseInt(document.getElementById('vagas-moto').value);
+                carroPrecoPrimeiraHora = parseFloat(document.getElementById('carro-primeira-hora').value);
+                carroPrecoHoraAdicional = parseFloat(document.getElementById('carro-hora-adicional').value);
+                motoPrecoPrimeiraHora = parseFloat(document.getElementById('moto-primeira-hora').value);
+                motoPrecoHoraAdicional = parseFloat(document.getElementById('moto-hora-adicional').value);
+                jurosMensalistaDiario = parseFloat(document.getElementById('juros-mensalista-diario').value);
+                
+                salvarDados();
+                updateUI();
+                showStatusMessage('Configurações salvas com sucesso!', true, 'status-configuracoes');
+            });
+
+            abrirCaixaBtn.addEventListener('click', () => {
+                const funcionario = funcionarioCaixaInput.value.trim();
+                const valorInicial = parseFloat(valorInicialCaixaInput.value) || 0;
+
+                if (!funcionario) {
+                    showCustomAlert('Por favor, informe o nome do funcionário responsável pelo caixa.', 'Erro');
+                    return;
+                }
+
+                caixaAberto = true;
+                funcionarioCaixa = funcionario;
+                caixaValorInicial = valorInicial;
+                caixaTotal = valorInicial;
+                caixaItens = [];
+
+                funcionarioCaixaInput.value = '';
+                valorInicialCaixaInput.value = '';
+
+                salvarDados();
+                renderCaixa();
+                showCustomAlert('Caixa aberto com sucesso!', 'Sucesso');
+            });
+
+            fecharCaixaBtn.addEventListener('click', () => {
+                fechamentoCaixaInputContainer.style.display = 'block';
+            });
+
+            confirmarFechamentoBtn.addEventListener('click', () => {
+                const valorFinalContado = parseFloat(valorFinalCaixaInput.value);
+                
+                if (isNaN(valorFinalContado)) {
+                    showCustomAlert('Por favor, informe o valor final contado no caixa.', 'Erro');
+                    return;
+                }
+
+                const diferenca = valorFinalContado - caixaTotal;
+                let mensagemDiferenca = '';
+                
+                if (diferenca > 0) {
+                    mensagemDiferenca = `Sobra de ${formatarMoeda(diferenca)}`;
+                    diferencaCaixaDisplay.style.color = 'var(--cor-sucesso)';
+                } else if (diferenca < 0) {
+                    mensagemDiferenca = `Falta de ${formatarMoeda(Math.abs(diferenca))}`;
+                    diferencaCaixaDisplay.style.color = 'var(--cor-erro)';
+                } else {
+                    mensagemDiferenca = 'Caixa confere exatamente';
+                    diferencaCaixaDisplay.style.color = 'var(--cor-sucesso)';
+                }
+                
+                diferencaCaixaDisplay.textContent = mensagemDiferenca;
+
+                showCustomConfirm(`${mensagemDiferenca}. Confirma o fechamento do caixa?`, 'Confirmar Fechamento', (confirmed) => {
+                    if (confirmed) {
+                        caixaAberto = false;
+                        funcionarioCaixa = '';
+                        caixaTotal = 0;
+                        caixaValorInicial = 0;
+                        // CORREÇÃO: NÃO limpar os itens do caixa nem os relatórios
+                        // caixaItens = []; // Esta linha foi removida para manter os dados
+                        fechamentoCaixaInputContainer.style.display = 'none';
+                        valorFinalCaixaInput.value = '';
+                        salvarDados();
+                        renderCaixa();
+                        showCustomAlert('Caixa fechado com sucesso!', 'Sucesso');
+                    } else {
+                        fechamentoCaixaInputContainer.style.display = 'none';
+                        diferencaCaixaDisplay.textContent = '';
+                    }
+                });
+            });
+
+            adicionarItemBtn.addEventListener('click', () => {
+                const descricao = itemDescricaoInput.value.trim();
+                const valor = parseFloat(itemValorInput.value);
+
+                if (descricao && !isNaN(valor) && valor > 0) {
+                    caixaItens.push({
+                        descricao: descricao,
+                        valor: valor,
+                        metodo: 'Receita Extra',
+                        data: new Date().toISOString(),
+                        type: 'receita_extra'
+                    });
+                    caixaTotal += valor;
+                    salvarDados();
+                    renderCaixa();
+                    itemDescricaoInput.value = '';
+                    itemValorInput.value = '';
+                } else {
+                    showCustomAlert('Por favor, preencha a descrição e um valor válido para o item.', 'Erro');
+                }
+            });
+
+            mensalistaForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nome = clientesNomeInput.value.trim();
+                const tipoVeiculo = clientesTipoVeiculoInput.value;
+                const placa = clientesPlacaInput.value.toUpperCase().trim();
+                const telefone = clientesTelefoneInput.value.trim();
+                const endereco = clientesEnderecoInput.value.trim();
+                const valorMensal = parseFloat(clientesValorMensalInput.value);
+                const dataVencimento = clientesDataVencimentoInput.value;
+
+                if (!nome || !tipoVeiculo || !placa || isNaN(valorMensal) || valorMensal <= 0 || !dataVencimento) {
+                    showCustomAlert('Por favor, preencha todos os campos obrigatórios corretamente para o cliente mensalista.', 'Erro de Validação', 'mensalista-status-message');
+                    return;
+                }
+
+                if (clientesMensalistas.some(c => c.placa === placa)) {
+                    showCustomAlert('Já existe um cliente mensalista cadastrado com esta placa.', 'Placa Duplicada', 'mensalista-status-message');
+                    return;
+                }
+
+                const novoCliente = {
+                    id: Date.now(),
+                    nome,
+                    tipoVeiculo,
+                    placa,
+                    telefone,
+                    endereco,
+                    valorMensal,
+                    dataVencimento,
+                    dataCadastro: new Date().toISOString()
+                };
+
+                clientesMensalistas.push(novoCliente);
+                salvarDados();
+                renderClientesMensalistas();
+                showStatusMessage('Cliente mensalista cadastrado com sucesso!', true, 'mensalista-status-message');
+                mensalistaForm.reset();
+            });
+
+            btnExportarFinanceiro.addEventListener('click', gerarRelatorioFinanceiroPDF);
+            btnExportarVendasProdutos.addEventListener('click', gerarRelatorioVendasProdutosPDF); // Novo evento para exportar vendas
+
+            relatorioPeriodoSelect.addEventListener('change', updateUI);
+
+            // Eventos da seção de Vendas
+            cadastroProdutoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nome = produtoNomeInput.value.trim();
+                const categoria = produtoCategoriaInput.value.trim();
+                const precoCusto = parseFloat(produtoPrecoCustoInput.value);
+                const precoVenda = parseFloat(produtoPrecoVendaInput.value);
+
+                if (!nome || !categoria || isNaN(precoCusto) || precoCusto <= 0 || isNaN(precoVenda) || precoVenda <= 0) {
+                    showStatusMessage('Por favor, preencha todos os campos corretamente para o produto.', false, 'produto-status-message');
+                    return;
+                }
+
+                const novoProduto = {
+                    id: Date.now(),
+                    nome,
+                    categoria,
+                    precoCusto,
+                    precoVenda
+                };
+                produtos.push(novoProduto);
+                salvarDados();
+                renderProdutos();
+                showStatusMessage('Produto cadastrado com sucesso!', true, 'produto-status-message');
+                cadastroProdutoForm.reset();
+            });
+
+            adicionarAoCarrinhoBtn.addEventListener('click', adicionarProdutoAoCarrinho);
+            
+            // Alterado para abrir o modal de pagamento
+            finalizarVendaBtn.addEventListener('click', () => {
+                if (carrinhoVendas.length === 0) {
+                    showStatusMessage('O carrinho está vazio. Adicione produtos para finalizar a venda.', false, 'venda-status-message');
+                    return;
+                }
+                const totalVenda = carrinhoVendas.reduce((sum, item) => sum + item.total, 0);
+                openVendaPagamentoModal(totalVenda);
+            });
+
+            // Eventos do Modal de Pagamento de Vendas
+            vendaPagamentoOpcoes.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const metodo = e.target.getAttribute('data-metodo');
+                    if (metodo === 'Dinheiro') {
+                        vendaTrocoContainer.style.display = 'flex';
+                        vendaValorRecebidoInput.value = vendaParaFinalizar.total.toFixed(2);
+                        vendaTrocoValor.textContent = formatarMoeda(0);
+                        vendaTrocoError.style.display = 'none';
+                        btnFinalizarVendaDinheiro.disabled = false;
+                    } else {
+                        finalizeSaleProcess(metodo);
+                    }
+                }
+            });
+
+            vendaValorRecebidoInput.addEventListener('input', () => {
+                const totalVenda = vendaParaFinalizar.total;
+                const valorRecebido = parseFloat(vendaValorRecebidoInput.value);
+                if (isNaN(valorRecebido) || valorRecebido < totalVenda) {
+                    vendaTrocoValor.textContent = formatarMoeda(0);
+                    vendaTrocoError.style.display = 'block';
+                    btnFinalizarVendaDinheiro.disabled = true;
+                } else {
+                    const troco = valorRecebido - totalVenda;
+                    vendaTrocoValor.textContent = formatarMoeda(troco);
+                    vendaTrocoError.style.display = 'none';
+                    btnFinalizarVendaDinheiro.disabled = false;
+                }
+            });
+
+            btnFinalizarVendaDinheiro.addEventListener('click', () => {
+                finalizeSaleProcess('Dinheiro');
+            });
+
+            vendaPagamentoModal.addEventListener('click', (e) => {
+                if (e.target === vendaPagamentoModal) {
+                    fecharVendaPagamentoModal();
+                }
+            });
+
+
+            // Eventos da seção Financeiro
+            contasPagarForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const descricao = contaDescricaoInput.value.trim();
+                const categoria = contaCategoriaInput.value.trim();
+                const valor = parseFloat(contaValorInput.value);
+                const vencimento = contaVencimentoInput.value;
+
+                if (!descricao || !categoria || isNaN(valor) || valor <= 0 || !vencimento) {
+                    showCustomAlert('Por favor, preencha todos os campos corretamente para a conta a pagar.', 'Erro de Validação', 'financeiro-status-message');
+                    return;
+                }
+
+                contasAPagar.push({
+                    id: Date.now(),
+                    descricao,
+                    categoria,
+                    valor,
+                    vencimento,
+                    status: 'Pendente'
+                });
+                salvarDados();
+                updateUI();
+                showStatusMessage('Conta a pagar adicionada com sucesso!', true, 'financeiro-status-message');
+                contasPagarForm.reset();
+            });
+
+            pagamentosFornecedorForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!caixaAberto) {
+                    showCustomAlert('O caixa precisa estar aberto para registrar pagamentos.', 'Erro', 'financeiro-status-message');
+                    return;
+                }
+                const fornecedor = fornecedorNomeInput.value.trim();
+                const valor = parseFloat(pagamentoFornecedorValorInput.value);
+                const metodo = pagamentoFornecedorMetodoSelect.value;
+
+                if (!fornecedor || isNaN(valor) || valor <= 0 || !metodo) {
+                    showCustomAlert('Por favor, preencha todos os campos corretamente para o pagamento a fornecedor.', 'Erro de Validação', 'financeiro-status-message');
+                    return;
+                }
+
+                pagamentosFornecedores.push({
+                    id: Date.now(),
+                    fornecedor,
+                    valor,
+                    metodo,
+                    data: new Date().toISOString()
+                });
+                caixaItens.push({
+                    descricao: `Pagamento a fornecedor: ${fornecedor}`,
+                    valor: -valor, // Despesa
+                    metodo,
+                    data: new Date().toISOString(),
+                    type: 'pagamento_fornecedor'
+                });
+                caixaTotal -= valor; // Deduzir do caixa
+                salvarDados();
+                updateUI();
+                showStatusMessage('Pagamento a fornecedor registrado com sucesso!', true, 'financeiro-status-message');
+                pagamentosFornecedorForm.reset();
+            });
+
+            pagamentosSalarioForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!caixaAberto) {
+                    showCustomAlert('O caixa precisa estar aberto para registrar pagamentos.', 'Erro', 'financeiro-status-message');
+                    return;
+                }
+                const funcionario = funcionarioNomeSalarioInput.value.trim();
+                const valor = parseFloat(pagamentoSalarioValorInput.value);
+                const metodo = pagamentoSalarioMetodoSelect.value;
+
+                if (!funcionario || isNaN(valor) || valor <= 0 || !metodo) {
+                    showCustomAlert('Por favor, preencha todos os campos corretamente para o pagamento de salário.', 'Erro de Validação', 'financeiro-status-message');
+                    return;
+                }
+
+                pagamentosSalarios.push({
+                    id: Date.now(),
+                    funcionario,
+                    valor,
+                    metodo,
+                    data: new Date().toISOString()
+                });
+                caixaItens.push({
+                    descricao: `Pagamento de salário: ${funcionario}`,
+                    valor: -valor, // Despesa
+                    metodo,
+                    data: new Date().toISOString(),
+                    type: 'pagamento_salario'
+                });
+                caixaTotal -= valor; // Deduzir do caixa
+                salvarDados();
+                updateUI();
+                showStatusMessage('Pagamento de salário registrado com sucesso!', true, 'financeiro-status-message');
+                pagamentosSalarioForm.reset();
+            });
+
+            valesFuncionarioForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!caixaAberto) {
+                    showCustomAlert('O caixa precisa estar aberto para registrar vales.', 'Erro', 'financeiro-status-message');
+                    return;
+                }
+                const funcionario = funcionarioNomeValeInput.value.trim();
+                const valor = parseFloat(valeValorInput.value);
+                const metodo = valeMetodoSelect.value;
+
+                if (!funcionario || isNaN(valor) || valor <= 0 || !metodo) {
+                    showCustomAlert('Por favor, preencha todos os campos corretamente para o vale a funcionário.', 'Erro de Validação', 'financeiro-status-message');
+                    return;
+                }
+
+                valesFuncionarios.push({
+                    id: Date.now(),
+                    funcionario,
+                    valor,
+                    metodo,
+                    data: new Date().toISOString()
+                });
+                caixaItens.push({
+                    descricao: `Vale a funcionário: ${funcionario}`,
+                    valor: -valor, // Despesa
+                    metodo,
+                    data: new Date().toISOString(),
+                    type: 'vale'
+                });
+                caixaTotal -= valor; // Deduzir do caixa
+                salvarDados();
+                updateUI();
+                showStatusMessage('Vale a funcionário registrado com sucesso!', true, 'financeiro-status-message');
+                valesFuncionarioForm.reset();
+            });
+
+            // Evento para cadastro de novos usuários
+            cadastroUsuarioForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = novoUsernameInput.value.trim();
+                const password = novoPasswordInput.value.trim();
+
+                if (!username || !password) {
+                    showStatusMessage('Por favor, preencha o nome de usuário e a senha.', false, 'usuario-status-message');
+                    return;
+                }
+
+                if (adicionarUsuario(username, password, 'simples')) {
+                    cadastroUsuarioForm.reset();
+                }
+            });
+
+            // Evento para o botão de sair
+            logoutBtn.addEventListener('click', logout);
+        });
+    </script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/service-worker.js')
+        .catch(console.error);
+    });
+  }
+</script>
+
+</body>
+</html>
+
