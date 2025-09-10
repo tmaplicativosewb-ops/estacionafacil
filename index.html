@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>TM Estacionamento Web</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TM Estacionamento Web</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
         /* Estilos CSS */
         :root {
             --cor-principal: #3a86ff;
@@ -641,697 +640,816 @@
     </style>
 </head>
 <body>
-<div id="login-container">
-<div id="login-form-card">
-<h1>TM Aplicativos Web</h1>
-<p>Acesse o painel de controle do estacionamento</p>
-<form id="login-form">
-<div class="input-group">
-<input id="username" placeholder="Usuário" required="" type="text"/>
-</div>
-<div class="input-group">
-<input id="password" placeholder="Senha" required="" type="password"/>
-</div>
-<button type="submit">Entrar</button>
-</form>
-<p id="login-error">Usuário ou senha inválidos.</p>
-<p id="login-success">Login realizado com sucesso!</p>
-</div>
-</div>
-<div id="main-app">
-<aside id="sidebar">
-<div id="sidebar-header">
-<button id="sidebar-toggle">≡</button>
-<h2>Estacionamento</h2>
-</div>
-<ul>
-<li>
-<a class="sidebar-item" data-target="dashboard-section" href="#">
-<span class="icon">📊</span> <span class="sidebar-item-text">Dashboard</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="vagas-section" href="#">
-<span class="icon">🚧</span> <span class="sidebar-item-text">Vagas</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="veiculos-section" href="#">
-<span class="icon">🚗</span> <span class="sidebar-item-text">Veículos</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="vendas-section" href="#">
-<span class="icon">💸</span> <span class="sidebar-item-text">Vendas</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="caixa-section" href="#">
-<span class="icon">💰</span> <span class="sidebar-item-text">Caixa</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="financeiro-section" href="#">
-<span class="icon">💵</span> <span class="sidebar-item-text">Financeiro</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="relatorios-section" href="#">
-<span class="icon">📄</span> <span class="sidebar-item-text">Relatórios</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="clientes-section" href="#">
-<span class="icon">👤</span> <span class="sidebar-item-text">Clientes Mensalistas</span>
-</a>
-</li>
-<li>
-<a class="sidebar-item" data-target="configuracoes-section" href="#">
-<span class="icon">⚙</span> <span class="sidebar-item-text">Configurações</span>
-</a>
-</li>
-</ul>
-</aside>
-<main id="content-container">
-<section class="content-section" id="dashboard-section">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-<h1>Dashboard</h1>
-<button class="btn" id="logout-btn" style="background-color: var(--cor-erro); width: auto; padding: 10px 20px;">Sair</button>
-</div>
-<div class="dashboard-card">
-<h2>Vagas Disponíveis</h2>
-<p id="vagas-disponiveis">Carregando...</p>
-</div>
-<div class="dashboard-card">
-<h2>Veículos Estacionados</h2>
-<p id="veiculos-estacionados">Carregando...</p>
-</div>
-<div class="dashboard-card">
-<h2>Clientes Mensalistas</h2>
-<p id="total-clientes-mensalistas">Carregando...</p>
-</div>
-<div class="dashboard-card">
-<h2>Mensalistas em Atraso</h2>
-<p id="mensalistas-em-atraso">Carregando...</p>
-</div>
-</section>
-<section class="content-section" id="vagas-section">
-<h1>Mapa de Vagas</h1>
-<p>Status em tempo real de cada vaga do estacionamento.</p>
-<h3>Vagas para Carros</h3>
-<div class="vagas-grid" id="vagas-carro-grid">
-</div>
-<h3>Vagas para Motos</h3>
-<div class="vagas-grid" id="vagas-moto-grid">
-</div>
-</section>
-<section class="content-section" id="veiculos-section">
-<h1>Gerenciar Veículos</h1>
-<form id="veiculos-form">
-<div class="input-group">
-<input id="placa" placeholder="Placa do Veículo (ex: ABC-1234)" required="" type="text"/>
-</div>
-<div class="input-group">
-<select id="tipo" required="">
-<option value="">Selecione o Tipo de Veículo</option>
-<option value="Carro">Carro</option>
-<option value="Moto">Moto</option>
-</select>
-</div>
-<button id="btn-entrada" type="submit">Registrar Entrada</button>
-<p id="status-message"></p>
-</form>
-<h2>Veículos Estacionados</h2>
-<div id="veiculos-table-container">
-<table>
-<thead>
-<tr>
-<th>Placa</th>
-<th>Tipo</th>
-<th>Entrada</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="veiculos-table-body">
-</tbody>
-</table>
-</div>
-</section>
-<section class="content-section" id="vendas-section">
-<h1>Gerenciar Vendas e Produtos</h1>
-<div class="dashboard-card">
-<h2>Cadastro de Produtos</h2>
-<form id="cadastro-produto-form">
-<div class="input-group">
-<input id="produto-nome" placeholder="Nome do Produto" required="" type="text"/>
-</div>
-<div class="input-group">
-<input id="produto-categoria" placeholder="Categoria (ex: Bebidas, Doces)" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="produto-preco-custo">Preço de Custo (R$):</label>
-<input id="produto-preco-custo" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="produto-preco-venda">Preço de Venda (R$):</label>
-<input id="produto-preco-venda" min="0" required="" step="0.01" type="number"/>
-</div>
-<button type="submit">Cadastrar Produto</button>
-<p id="produto-status-message"></p>
-</form>
-</div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Produtos Cadastrados</h2>
-<table>
-<thead>
-<tr>
-<th>Nome</th>
-<th>Categoria</th>
-<th>Custo</th>
-<th>Venda</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="produtos-table-body">
-<!-- Produtos serão adicionados aqui -->
-</tbody>
-</table>
-</div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Realizar Venda</h2>
-<div id="realizar-venda-container">
-<div class="input-group">
-<select class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" id="venda-produto-select">
-<option value="">Selecione um Produto</option>
-</select>
-</div>
-<div class="input-group">
-<label for="venda-quantidade">Quantidade:</label>
-<input id="venda-quantidade" min="1" type="number" value="1"/>
-</div>
-<button class="btn" id="adicionar-ao-carrinho-btn" style="background-color: var(--cor-principal);">Adicionar ao Carrinho</button>
-</div>
-<h3 class="mt-4">Carrinho de Compras</h3>
-<ul class="caixa-item-list" id="carrinho-list">
-<!-- Itens do carrinho serão adicionados aqui -->
-</ul>
-<div class="text-right mt-4">
-<p class="text-xl font-bold">Total do Carrinho: <span id="carrinho-total-valor" style="color: var(--cor-sucesso);">R$ 0,00</span></p>
-<button class="btn mt-4" id="finalizar-venda-btn" style="background-color: var(--cor-sucesso);">Finalizar Venda</button>
-</div>
-<p id="venda-status-message"></p>
-</div>
-</section>
-<section class="content-section" id="caixa-section">
-<h1>Caixa</h1>
-<div id="caixa-content-container">
-<div class="flex items-center justify-between mb-4">
-<h2 class="text-xl font-bold">Gerenciamento de Caixa</h2>
-<span class="caixa-status" id="caixa-status-text">Caixa Fechado</span>
-</div>
-<div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-8" id="caixa-controls">
-<input class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" id="funcionario-caixa-input" placeholder="Nome do Funcionário" type="text"/>
-<input class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" id="valor-inicial-caixa-input" min="0" placeholder="Valor Inicial (R$)" step="0.01" type="number"/>
-<button class="btn btn-entrada w-full md:w-auto" id="abrir-caixa-btn" style="background-color: var(--cor-sucesso);">Abrir Caixa</button>
-<button class="btn w-full md:w-auto" id="fechar-caixa-btn" style="background-color: var(--cor-erro);">Fechar Caixa</button>
-</div>
-<div id="adicionar-item-caixa-section" style="display: none;">
-<h3 class="text-lg font-bold mb-2">Adicionar Receita Extra</h3>
-<div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-<input class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" id="item-descricao-input" placeholder="Descrição do Item" type="text"/>
-<input class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full md:w-1/3" id="item-valor-input" min="0" placeholder="Valor (R$)" step="0.01" type="number"/>
-<button class="btn btn-entrada w-full md:w-auto" id="adicionar-item-btn">Adicionar</button>
-</div>
-</div>
-<div id="fechamento-caixa-input-container" style="display: none;">
-<h3 class="text-lg font-bold mb-2">Fechamento de Caixa</h3>
-<div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-<input class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" id="valor-final-caixa-input" min="0" placeholder="Valor Final Contado (R$)" step="0.01" type="number"/>
-<button class="btn w-full md:w-auto" id="confirmar-fechamento-btn" style="background-color: var(--cor-erro);">Confirmar Fechamento</button>
-</div>
-<p class="mt-2 text-center font-bold" id="diferenca-caixa-display"></p>
-</div>
-<div id="caixa-resumo">
-<h3>Resumo do Caixa</h3>
-<p>Funcionário: <span id="funcionario-caixa-display">-</span></p>
-<p>Valor Inicial: <span id="valor-inicial-display">R$ 0,00</span></p>
-<p>Total Atual: <span id="caixa-total-display">R$ 0,00</span></p>
-<ul class="caixa-item-list" id="caixa-itens-list">
-<!-- Itens do caixa serão adicionados aqui -->
-</ul>
-</div>
-</div>
-</section>
-<section class="content-section" id="financeiro-section">
-<h1>Financeiro</h1>
-<p>Gerencie contas a pagar, pagamentos a fornecedores, salários e vales.</p>
-<div class="dashboard-card">
-<h2>Contas a Pagar</h2>
-<form id="contas-pagar-form">
-<div class="input-group">
-<label for="conta-descricao">Descrição da Conta:</label>
-<input id="conta-descricao" placeholder="Descrição da conta" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="conta-categoria">Categoria:</label>
-<input id="conta-categoria" placeholder="Categoria (ex: Energia, Água, Aluguel)" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="conta-valor">Valor (R$):</label>
-<input id="conta-valor" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="conta-vencimento">Data de Vencimento:</label>
-<input id="conta-vencimento" required="" type="date"/>
-</div>
-<button type="submit">Adicionar Conta</button>
-</form>
-<h3 style="margin-top: 20px;">Contas Cadastradas</h3>
-<table>
-<thead>
-<tr>
-<th>Descrição</th>
-<th>Categoria</th>
-<th>Valor</th>
-<th>Vencimento</th>
-<th>Status</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="contas-pagar-table-body">
-<!-- Contas a pagar serão adicionadas aqui -->
-</tbody>
-</table>
-</div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Pagamentos a Fornecedores</h2>
-<form id="pagamentos-fornecedor-form">
-<div class="input-group">
-<label for="fornecedor-nome">Nome do Fornecedor:</label>
-<input id="fornecedor-nome" placeholder="Nome do fornecedor" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="pagamento-fornecedor-valor">Valor (R$):</label>
-<input id="pagamento-fornecedor-valor" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="pagamento-fornecedor-metodo">Método de Pagamento:</label>
-<select id="pagamento-fornecedor-metodo" required="">
-<option value="Dinheiro">Dinheiro</option>
-<option value="Cartão">Cartão</option>
-<option value="Pix">Pix</option>
-</select>
-</div>
-<button type="submit">Registrar Pagamento</button>
-</form>
-<h3 style="margin-top: 20px;">Histórico de Pagamentos</h3>
-<table>
-<thead>
-<tr>
-<th>Fornecedor</th>
-<th>Valor</th>
-<th>Método</th>
-<th>Data</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="pagamentos-fornecedor-table-body">
-<!-- Pagamentos a fornecedores serão adicionados aqui -->
-</tbody>
-</table>
-</div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Pagamentos de Salários</h2>
-<form id="pagamentos-salario-form">
-<div class="input-group">
-<label for="funcionario-nome-salario">Nome do Funcionário:</label>
-<input id="funcionario-nome-salario" placeholder="Nome do funcionário" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="pagamento-salario-valor">Valor (R$):</label>
-<input id="pagamento-salario-valor" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="pagamento-salario-metodo">Método de Pagamento:</label>
-<select id="pagamento-salario-metodo" required="">
-<option value="Dinheiro">Dinheiro</option>
-<option value="Cartão">Cartão</option>
-<option value="Pix">Pix</option>
-</select>
-</div>
-<button type="submit">Registrar Pagamento</button>
-</form>
-<h3 style="margin-top: 20px;">Histórico de Pagamentos</h3>
-<table>
-<thead>
-<tr>
-<th>Funcionário</th>
-<th>Valor</th>
-<th>Método</th>
-<th>Data</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="pagamentos-salario-table-body">
-<!-- Pagamentos de salários serão adicionados aqui -->
-</tbody>
-</table>
-</div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Vales a Funcionários</h2>
-<form id="vales-funcionario-form">
-<div class="input-group">
-<label for="funcionario-nome-vale">Nome do Funcionário:</label>
-<input id="funcionario-nome-vale" placeholder="Nome do funcionário" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="vale-valor">Valor (R$):</label>
-<input id="vale-valor" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="vale-metodo">Método de Pagamento:</label>
-<select id="vale-metodo" required="">
-<option value="Dinheiro">Dinheiro</option>
-<option value="Cartão">Cartão</option>
-<option value="Pix">Pix</option>
-</select>
-</div>
-<button type="submit">Registrar Vale</button>
-</form>
-<h3 style="margin-top: 20px;">Histórico de Vales</h3>
-<table>
-<thead>
-<tr>
-<th>Funcionário</th>
-<th>Valor</th>
-<th>Método</th>
-<th>Data</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="vales-funcionario-table-body">
-<!-- Vales a funcionários serão adicionados aqui -->
-</tbody>
-</table>
-</div>
-<p id="financeiro-status-message"></p>
-</section>
-<section class="content-section" id="relatorios-section">
-<h1>Relatórios de Estacionamento</h1>
-<p>Histórico de veículos que já saíram do estacionamento, incluindo a duração e o custo.</p>
-<button class="btn btn-limpar" id="btn-limpar-relatorios">Limpar Relatórios</button>
-<div id="relatorios-table-container">
-<table>
-<thead>
-<tr>
-<th>Placa</th>
-<th>Tipo</th>
-<th>Entrada</th>
-<th>Saída</th>
-<th>Duração</th>
-<th>Custo</th>
-</tr>
-</thead>
-<tbody id="relatorios-table-body">
-</tbody>
-</table>
-</div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Resumo Financeiro</h2>
-<div class="input-group">
-<label for="relatorio-periodo">Período do Relatório:</label>
-<select class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500" id="relatorio-periodo">
-<option value="diario">Diário</option>
-<option value="semanal">Semanal</option>
-<option value="mensal">Mensal</option>
-<option value="total">Total</option>
-</select>
-</div>
-<p>Faturamento Total: <span id="faturamento-total-dia" style="font-weight: bold;">R$ 0,00</span></p>
-<p>Receitas de Estacionamento: <span id="receitas-estacionamento" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="estacionamento-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="estacionamento-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="estacionamento-pix">R$ 0,00</span></p>
-<p>Receitas Extras do Caixa: <span id="receitas-extras-caixa" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="extras-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="extras-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="extras-pix">R$ 0,00</span></p>
-<p>Receitas de Mensalistas: <span id="receitas-mensalistas" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="mensalistas-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="mensalistas-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="mensalistas-pix">R$ 0,00</span></p>
-<p>Receitas de Vendas de Produtos: <span id="receitas-vendas-produtos" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="vendas-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="vendas-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="vendas-pix">R$ 0,00</span></p>
-<h3 style="margin-top: 15px;">Despesas</h3>
-<p>Contas Pagas: <span id="despesas-contas-pagas" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="contas-pagas-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="contas-pagas-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="contas-pagas-pix">R$ 0,00</span></p>
-<p>Pagamentos a Fornecedores: <span id="despesas-fornecedores" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="fornecedores-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="fornecedores-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="fornecedores-pix">R$ 0,00</span></p>
-<p>Pagamentos de Salários: <span id="despesas-salarios" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="salarios-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="salarios-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="salarios-pix">R$ 0,00</span></p>
-<p>Vales a Funcionários: <span id="despesas-vales" style="font-weight: bold;">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Dinheiro: <span id="vales-dinheiro">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Cartão: <span id="vales-cartao">R$ 0,00</span></p>
-<p class="pl-4 text-sm">Pix: <span id="vales-pix">R$ 0,00</span></p>
-<button class="btn" id="btn-exportar-financeiro" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório Financeiro</button>
-</div>
-<div id="relatorio-financeiro-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Relatório de Vendas de Produtos</h2>
-<table>
-<thead>
-<tr>
-<th>Produto</th>
-<th>Categoria</th>
-<th>Quantidade</th>
-<th>Valor Total</th>
-<th>Data/Hora</th>
-</tr>
-</thead>
-<tbody id="vendas-produtos-table-body">
-<!-- Vendas de produtos serão adicionadas aqui -->
-</tbody>
-</table>
-<button class="btn" id="btn-exportar-vendas-produtos" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório de Vendas</button>
-</div>
-<div id="relatorio-vendas-produtos-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
-</section>
-<section class="content-section" id="clientes-section">
-<h1>Clientes Mensalistas</h1>
-<p>Gerenciar contratos de clientes com pagamentos mensais.</p>
-<!-- Formulário para Cadastro de Clientes -->
-<div class="dashboard-card">
-<h2>Cadastrar Novo Cliente</h2>
-<form id="mensalista-form">
-<div class="input-group">
-<input id="cliente-nome" placeholder="Nome do Cliente" required="" type="text"/>
-</div>
-<div class="input-group">
-<select id="cliente-tipo-veiculo" required="">
-<option value="">Tipo de Veículo</option>
-<option value="Carro">Carro</option>
-<option value="Moto">Moto</option>
-</select>
-</div>
-<div class="input-group">
-<input id="cliente-placa" placeholder="Placa do Veículo (ex: ABC-1234)" required="" type="text"/>
-</div>
-<div class="input-group">
-<input id="cliente-telefone" placeholder="Telefone (ex: 99-99999-9999)" type="tel"/>
-</div>
-<div class="input-group">
-<input id="cliente-endereco" placeholder="Endereço" type="text"/>
-</div>
-<div class="input-group">
-<label for="cliente-valor-mensal">Valor Mensal (R$):</label>
-<input id="cliente-valor-mensal" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="cliente-data-vencimento">Data de Vencimento:</label>
-<input id="cliente-data-vencimento" required="" type="date"/>
-</div>
-<button type="submit">Cadastrar Cliente</button>
-</form>
-<p class="status-success" id="mensalista-status-message" style="display: none;"></p>
-</div>
-<!-- Tabela para Listar Clientes Existentes -->
-<div class="dashboard-card" style="margin-top: 20px;">
-<h2>Clientes Ativos</h2>
-<table>
-<thead>
-<tr>
-<th>Nome</th>
-<th>Veículo</th>
-<th>Placa</th>
-<th>Telefone</th>
-<th>Valor Mensal</th>
-<th>Vencimento</th>
-<th>Status</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="mensalistas-table-body">
-<!-- Linhas de clientes serão adicionadas aqui pelo JavaScript -->
-</tbody>
-</table>
-</div>
-</section>
-<section class="content-section" id="configuracoes-section">
-<h1>Configurações</h1>
-<p>Defina a capacidade e os valores de estacionamento.</p>
-<form id="configuracoes-form">
-<h3>Capacidade do Estacionamento</h3>
-<div class="input-group">
-<label for="vagas-carro">Vagas para Carros (máx. 300)</label>
-<input id="vagas-carro" max="300" min="1" required="" step="1" type="number"/>
-</div>
-<div class="input-group">
-<label for="vagas-moto">Vagas para Motos (máx. 200)</label>
-<input id="vagas-moto" max="200" min="1" required="" step="1" type="number"/>
-</div>
-<h3>Preços de Estacionamento</h3>
-<div class="input-group">
-<label for="carro-primeira-hora">Valor da 1ª Hora (R$)</label>
-<input id="carro-primeira-hora" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="carro-hora-adicional">Valor das Horas Adicionais (R$)</label>
-<input id="carro-hora-adicional" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="moto-primeira-hora">Valor da 1ª Hora (R$)</label>
-<input id="moto-primeira-hora" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="moto-hora-adicional">Valor das Horas Adicionais (R$)</label>
-<input id="moto-hora-adicional" min="0" required="" step="0.01" type="number"/>
-</div>
-<div class="input-group">
-<label for="juros-mensalista-diario">Juros Mensalista Diário (%):</label>
-<input id="juros-mensalista-diario" max="100" min="0" required="" step="0.01" type="number"/>
-</div>
-<button type="submit">Salvar Configurações</button>
-<p id="status-configuracoes"></p>
-</form>
-<div class="dashboard-card" style="margin-top: 20px;">
-<h3>Gerenciar Usuários</h3>
-<form id="cadastro-usuario-form">
-<div class="input-group">
-<label for="novo-username">Nome de Usuário:</label>
-<input id="novo-username" placeholder="Nome de Usuário" required="" type="text"/>
-</div>
-<div class="input-group">
-<label for="novo-password">Senha:</label>
-<input id="novo-password" placeholder="Senha" required="" type="password"/>
-</div>
-<button style="background-color: var(--cor-principal);" type="submit">Cadastrar Novo Usuário</button>
-<p id="usuario-status-message"></p>
-</form>
-<h4 style="margin-top: 20px;">Usuários Cadastrados</h4>
-<table>
-<thead>
-<tr>
-<th>Nome de Usuário</th>
-<th>Tipo</th>
-<th>Ações</th>
-</tr>
-</thead>
-<tbody id="usuarios-table-body">
-<!-- Usuários serão adicionados aqui -->
-</tbody>
-</table>
-</div>
-<div class="dashboard-card" id="backup-restore-card" style="margin-top: 20px;"><h3>Backup e Restauração</h3><p>Faça backup dos seus dados ou restaure-os de um arquivo .json.</p><div class="btn-group"><button class="btn" id="btn-fazer-backup">Fazer Backup</button><button class="btn" id="btn-restaurar-backup">Restaurar Backup</button></div><input accept="application/json" id="input-restaurar-backup" style="display: none;" type="file"/></div></section>
-</main>
-</div>
-<!-- Modal de Cobrança -->
-<div id="cobranca-modal">
-<div id="cobranca-content">
-<h2>Cobrança de Estacionamento</h2>
-<p>Placa: <span class="cobranca-placa" id="modal-placa"></span></p>
-<p>Tempo: <span class="cobranca-tempo" id="modal-duracao"></span></p>
-<p>Custo: <span class="cobranca-custo" id="modal-custo"></span></p>
-<div class="btn-pagamento-group" id="pagamento-opcoes">
-<button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
-<button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
-<button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
-</div>
-<div id="troco-container">
-<label for="valor-recebido">Valor Recebido (R$):</label>
-<input id="valor-recebido" min="0" step="0.01" type="number"/>
-<p id="troco-valor">Troco: R$ 0,00</p>
-<p id="troco-error">Valor insuficiente!</p>
-<button class="btn" id="btn-finalizar-dinheiro" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
-</div>
-</div>
-</div>
-<!-- Modal de Pagamento Mensalista -->
-<div id="mensalista-pagamento-modal">
-<div id="mensalista-pagamento-content">
-<h2>Pagamento Mensalista</h2>
-<p>Cliente: <span class="mensalista-nome-modal" id="mensalista-nome-modal"></span></p>
-<p>Placa: <span id="mensalista-placa-modal"></span></p>
-<p>Valor Base: <span id="mensalista-valor-base-modal"></span></p>
-<p>Dias em Atraso: <span id="mensalista-dias-atraso-modal"></span></p>
-<p>Juros: <span id="mensalista-juros-modal"></span></p>
-<p>Total: <span class="mensalista-valor-total-modal" id="mensalista-valor-total-modal"></span></p>
-<div class="btn-pagamento-group" id="mensalista-pagamento-opcoes">
-<button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
-<button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
-<button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
-</div>
-<div id="mensalista-troco-container">
-<label for="mensalista-valor-recebido">Valor Recebido (R$):</label>
-<input id="mensalista-valor-recebido" min="0" step="0.01" type="number"/>
-<p id="mensalista-troco-valor">Troco: R$ 0,00</p>
-<p id="mensalista-troco-error">Valor insuficiente!</p>
-<button class="btn" id="btn-finalizar-mensalista-dinheiro" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
-</div>
-</div>
-</div>
-<!-- Modal de Pagamento de Vendas -->
-<div id="venda-pagamento-modal">
-<div id="venda-pagamento-content">
-<h2>Finalizar Venda</h2>
-<p>Total da Venda: <span class="venda-valor-final-modal" id="venda-valor-total-modal"></span></p>
-<div class="btn-pagamento-group" id="venda-pagamento-opcoes">
-<button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
-<button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
-<button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
-</div>
-<div id="venda-troco-container">
-<label for="venda-valor-recebido">Valor Recebido (R$):</label>
-<input id="venda-valor-recebido" min="0" step="0.01" type="number"/>
-<p id="venda-troco-valor">Troco: R$ 0,00</p>
-<p id="venda-troco-error">Valor insuficiente!</p>
-<button class="btn" id="btn-finalizar-venda-dinheiro" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
-</div>
-</div>
-</div>
-<!-- Custom Alert/Confirm Modal -->
-<div id="custom-modal-backdrop">
-<div id="custom-modal-content">
-<h3 id="custom-modal-title">Título</h3>
-<p id="custom-modal-message">Mensagem</p>
-<div id="custom-modal-buttons">
-<button class="btn" id="custom-modal-ok" style="background-color: var(--cor-principal); margin-right: 10px;">OK</button>
-<button class="btn" id="custom-modal-cancel" style="background-color: var(--cor-erro);">Cancelar</button>
-</div>
-</div>
-</div>
-<!-- Containers para PDFs -->
-<div id="recibo-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
-<div id="comprovante-entrada-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
-<div id="comprovante-venda-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
-<script>
+
+    <div id="login-container">
+        <div id="login-form-card">
+            <h1>TM Aplicativos Web</h1>
+            <p>Acesse o painel de controle do estacionamento</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Usuário" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Senha" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+            <p id="login-error">Usuário ou senha inválidos.</p>
+            <p id="login-success">Login realizado com sucesso!</p>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <aside id="sidebar">
+            <div id="sidebar-header">
+                <button id="sidebar-toggle">≡</button>
+                <h2>Estacionamento</h2>
+            </div>
+            <ul>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="dashboard-section">
+                        <span class="icon">&#x1F4CA;</span> <span class="sidebar-item-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="vagas-section">
+                        <span class="icon">&#x1F6A7;</span> <span class="sidebar-item-text">Vagas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="veiculos-section">
+                        <span class="icon">&#x1F697;</span> <span class="sidebar-item-text">Veículos</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="vendas-section">
+                        <span class="icon">&#x1F4B8;</span> <span class="sidebar-item-text">Vendas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="caixa-section">
+                        <span class="icon">&#x1F4B0;</span> <span class="sidebar-item-text">Caixa</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="financeiro-section">
+                        <span class="icon">&#x1F4B5;</span> <span class="sidebar-item-text">Financeiro</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="relatorios-section">
+                        <span class="icon">&#x1F4C4;</span> <span class="sidebar-item-text">Relatórios</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="clientes-section">
+                        <span class="icon">&#x1F464;</span> <span class="sidebar-item-text">Clientes Mensalistas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-item" data-target="configuracoes-section">
+                        <span class="icon">&#x2699;</span> <span class="sidebar-item-text">Configurações</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main id="content-container">
+            <section id="dashboard-section" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h1>Dashboard</h1>
+                    <button id="logout-btn" class="btn" style="background-color: var(--cor-erro); width: auto; padding: 10px 20px;">Sair</button>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Vagas Disponíveis</h2>
+                    <p id="vagas-disponiveis">Carregando...</p>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Veículos Estacionados</h2>
+                    <p id="veiculos-estacionados">Carregando...</p>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Clientes Mensalistas</h2>
+                    <p id="total-clientes-mensalistas">Carregando...</p>
+                </div>
+                <div class="dashboard-card">
+                    <h2>Mensalistas em Atraso</h2>
+                    <p id="mensalistas-em-atraso">Carregando...</p>
+                </div>
+            </section>
+            
+            <section id="vagas-section" class="content-section">
+                <h1>Mapa de Vagas</h1>
+                <p>Status em tempo real de cada vaga do estacionamento.</p>
+                <h3>Vagas para Carros</h3>
+                <div id="vagas-carro-grid" class="vagas-grid">
+                    </div>
+                <h3>Vagas para Motos</h3>
+                <div id="vagas-moto-grid" class="vagas-grid"></div>
+
+                <h3>Vagas para Vans</h3>
+                <div id="vagas-van-grid" class="vagas-grid"></div>
+
+                <h3>Vagas para Veículos de Grande Porte</h3>
+                <div id="vagas-grande-grid" class="vagas-grid"></div>
+                
+            </section>
+            
+            <section id="veiculos-section" class="content-section">
+                <h1>Gerenciar Veículos</h1>
+                
+                <form id="veiculos-form">
+                    <div class="input-group">
+                        <input type="text" id="placa" placeholder="Placa do Veículo (ex: ABC-1234)" required>
+                    </div>
+                    <div class="input-group">
+                        <select id="tipo" required>
+                            <option value="">Selecione o Tipo de Veículo</option>
+                            <option value="Carro">Carro</option>
+                            <option value="Moto">Moto</option>
+                                <option value="Van">Van</option>
+                                <option value="Grande">Veículo de grande porte</option>
+                            <option value="Van">Van</option>
+                            <option value="Grande">Veículo de grande porte</option>
+                        </select>
+                    </div>
+                    <button type="submit" id="btn-entrada">Registrar Entrada</button>
+                    <p id="status-message"></p>
+                </form>
+
+                <h2>Veículos Estacionados</h2>
+                <div id="veiculos-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Tipo</th>
+                                <th>Entrada</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="veiculos-table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="vendas-section" class="content-section">
+                <h1>Gerenciar Vendas e Produtos</h1>
+
+                <div class="dashboard-card">
+                    <h2>Cadastro de Produtos</h2>
+                    <form id="cadastro-produto-form">
+                        <div class="input-group">
+                            <input type="text" id="produto-nome" placeholder="Nome do Produto" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="produto-categoria" placeholder="Categoria (ex: Bebidas, Doces)" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="produto-preco-custo">Preço de Custo (R$):</label>
+                            <input type="number" id="produto-preco-custo" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="produto-preco-venda">Preço de Venda (R$):</label>
+                            <input type="number" id="produto-preco-venda" step="0.01" min="0" required>
+                        </div>
+                        <button type="submit">Cadastrar Produto</button>
+                        <p id="produto-status-message"></p>
+                    </form>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Produtos Cadastrados</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Custo</th>
+                                <th>Venda</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtos-table-body">
+                            <!-- Produtos serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Realizar Venda</h2>
+                    <div id="realizar-venda-container">
+                        <div class="input-group">
+                            <select id="venda-produto-select" class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full">
+                                <option value="">Selecione um Produto</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="venda-quantidade">Quantidade:</label>
+                            <input type="number" id="venda-quantidade" value="1" min="1">
+                        </div>
+                        <button id="adicionar-ao-carrinho-btn" class="btn" style="background-color: var(--cor-principal);">Adicionar ao Carrinho</button>
+                    </div>
+
+                    <h3 class="mt-4">Carrinho de Compras</h3>
+                    <ul id="carrinho-list" class="caixa-item-list">
+                        <!-- Itens do carrinho serão adicionados aqui -->
+                    </ul>
+                    <div class="text-right mt-4">
+                        <p class="text-xl font-bold">Total do Carrinho: <span id="carrinho-total-valor" style="color: var(--cor-sucesso);">R$ 0,00</span></p>
+                        <button id="finalizar-venda-btn" class="btn mt-4" style="background-color: var(--cor-sucesso);">Finalizar Venda</button>
+                    </div>
+                    <p id="venda-status-message"></p>
+                </div>
+            </section>
+            
+            <section id="caixa-section" class="content-section">
+                <h1>Caixa</h1>
+                <div id="caixa-content-container">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold">Gerenciamento de Caixa</h2>
+                        <span id="caixa-status-text" class="caixa-status">Caixa Fechado</span>
+                    </div>
+                    
+                    <div id="caixa-controls" class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-8">
+                        <input type="text" id="funcionario-caixa-input" placeholder="Nome do Funcionário" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full">
+                        <input type="number" id="valor-inicial-caixa-input" placeholder="Valor Inicial (R$)" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" step="0.01" min="0">
+                        <button id="abrir-caixa-btn" class="btn btn-entrada w-full md:w-auto" style="background-color: var(--cor-sucesso);">Abrir Caixa</button>
+                        <button id="fechar-caixa-btn" class="btn w-full md:w-auto" style="background-color: var(--cor-erro);">Fechar Caixa</button>
+                    </div>
+
+                    <div id="adicionar-item-caixa-section" style="display: none;">
+                        <h3 class="text-lg font-bold mb-2">Adicionar Receita Extra</h3>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                            <input type="text" id="item-descricao-input" placeholder="Descrição do Item" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full">
+                            <input type="number" id="item-valor-input" placeholder="Valor (R$)" class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full md:w-1/3" step="0.01" min="0">
+                            <button id="adicionar-item-btn" class="btn btn-entrada w-full md:w-auto">Adicionar</button>
+                        </div>
+                    </div>
+
+                    <div id="fechamento-caixa-input-container" style="display: none;">
+                        <h3 class="text-lg font-bold mb-2">Fechamento de Caixa</h3>
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                            <input type="number" id="valor-final-caixa-input" placeholder="Valor Final Contado (R$)" class="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 w-full" step="0.01" min="0">
+                            <button id="confirmar-fechamento-btn" class="btn w-full md:w-auto" style="background-color: var(--cor-erro);">Confirmar Fechamento</button>
+                        </div>
+                        <p id="diferenca-caixa-display" class="mt-2 text-center font-bold"></p>
+                    </div>
+
+                    <div id="caixa-resumo">
+                        <h3>Resumo do Caixa</h3>
+                        <p>Funcionário: <span id="funcionario-caixa-display">-</span></p>
+                        <p>Valor Inicial: <span id="valor-inicial-display">R$ 0,00</span></p>
+                        <p>Total Atual: <span id="caixa-total-display">R$ 0,00</span></p>
+                        <ul id="caixa-itens-list" class="caixa-item-list">
+                            <!-- Itens do caixa serão adicionados aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="financeiro-section" class="content-section">
+                <h1>Financeiro</h1>
+                <p>Gerencie contas a pagar, pagamentos a fornecedores, salários e vales.</p>
+
+                <div class="dashboard-card">
+                    <h2>Contas a Pagar</h2>
+                    <form id="contas-pagar-form">
+                        <div class="input-group">
+                            <label for="conta-descricao">Descrição da Conta:</label>
+                            <input type="text" id="conta-descricao" placeholder="Descrição da conta" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="conta-categoria">Categoria:</label>
+                            <input type="text" id="conta-categoria" placeholder="Categoria (ex: Energia, Água, Aluguel)" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="conta-valor">Valor (R$):</label>
+                            <input type="number" id="conta-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="conta-vencimento">Data de Vencimento:</label>
+                            <input type="date" id="conta-vencimento" required>
+                        </div>
+                        <button type="submit">Adicionar Conta</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Contas Cadastradas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contas-pagar-table-body">
+                            <!-- Contas a pagar serão adicionadas aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Pagamentos a Fornecedores</h2>
+                    <form id="pagamentos-fornecedor-form">
+                        <div class="input-group">
+                            <label for="fornecedor-nome">Nome do Fornecedor:</label>
+                            <input type="text" id="fornecedor-nome" placeholder="Nome do fornecedor" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-fornecedor-valor">Valor (R$):</label>
+                            <input type="number" id="pagamento-fornecedor-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-fornecedor-metodo">Método de Pagamento:</label>
+                            <select id="pagamento-fornecedor-metodo" required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <button type="submit">Registrar Pagamento</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Histórico de Pagamentos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fornecedor</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagamentos-fornecedor-table-body">
+                            <!-- Pagamentos a fornecedores serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Pagamentos de Salários</h2>
+                    <form id="pagamentos-salario-form">
+                        <div class="input-group">
+                            <label for="funcionario-nome-salario">Nome do Funcionário:</label>
+                            <input type="text" id="funcionario-nome-salario" placeholder="Nome do funcionário" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-salario-valor">Valor (R$):</label>
+                            <input type="number" id="pagamento-salario-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="pagamento-salario-metodo">Método de Pagamento:</label>
+                            <select id="pagamento-salario-metodo" required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <button type="submit">Registrar Pagamento</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Histórico de Pagamentos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagamentos-salario-table-body">
+                            <!-- Pagamentos de salários serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Vales a Funcionários</h2>
+                    <form id="vales-funcionario-form">
+                        <div class="input-group">
+                            <label for="funcionario-nome-vale">Nome do Funcionário:</label>
+                            <input type="text" id="funcionario-nome-vale" placeholder="Nome do funcionário" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="vale-valor">Valor (R$):</label>
+                            <input type="number" id="vale-valor" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="vale-metodo">Método de Pagamento:</label>
+                            <select id="vale-metodo" required>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Pix">Pix</option>
+                            </select>
+                        </div>
+                        <button type="submit">Registrar Vale</button>
+                    </form>
+
+                    <h3 style="margin-top: 20px;">Histórico de Vales</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vales-funcionario-table-body">
+                            <!-- Vales a funcionários serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="financeiro-status-message"></p>
+            </section>
+            
+            <section id="relatorios-section" class="content-section">
+                <h1>Relatórios de Estacionamento</h1>
+                <p>Histórico de veículos que já saíram do estacionamento, incluindo a duração e o custo.</p>
+
+                <button id="btn-limpar-relatorios" class="btn btn-limpar">Limpar Relatórios</button>
+
+                <div id="relatorios-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Tipo</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Duração</th>
+                                <th>Custo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relatorios-table-body">
+                            </tbody>
+                    </table>
+                </div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Resumo Financeiro</h2>
+                    <div class="input-group">
+                        <label for="relatorio-periodo">Período do Relatório:</label>
+                        <select id="relatorio-periodo" class="p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                            <option value="diario">Diário</option>
+                            <option value="semanal">Semanal</option>
+                            <option value="mensal">Mensal</option>
+                            <option value="total">Total</option>
+                        </select>
+                    </div>
+                    <p>Faturamento Total: <span id="faturamento-total-dia" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p>Receitas de Estacionamento: <span id="receitas-estacionamento" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="estacionamento-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="estacionamento-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="estacionamento-pix">R$ 0,00</span></p>
+
+                    <p>Receitas Extras do Caixa: <span id="receitas-extras-caixa" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="extras-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="extras-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="extras-pix">R$ 0,00</span></p>
+
+                    <p>Receitas de Mensalistas: <span id="receitas-mensalistas" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="mensalistas-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="mensalistas-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="mensalistas-pix">R$ 0,00</span></p>
+
+                    <p>Receitas de Vendas de Produtos: <span id="receitas-vendas-produtos" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="vendas-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="vendas-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="vendas-pix">R$ 0,00</span></p>
+
+                    <h3 style="margin-top: 15px;">Despesas</h3>
+                    <p>Contas Pagas: <span id="despesas-contas-pagas" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="contas-pagas-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="contas-pagas-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="contas-pagas-pix">R$ 0,00</span></p>
+
+                    <p>Pagamentos a Fornecedores: <span id="despesas-fornecedores" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="fornecedores-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="fornecedores-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="fornecedores-pix">R$ 0,00</span></p>
+
+                    <p>Pagamentos de Salários: <span id="despesas-salarios" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="salarios-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="salarios-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="salarios-pix">R$ 0,00</span></p>
+
+                    <p>Vales a Funcionários: <span id="despesas-vales" style="font-weight: bold;">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Dinheiro: <span id="vales-dinheiro">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Cartão: <span id="vales-cartao">R$ 0,00</span></p>
+                    <p class="pl-4 text-sm">Pix: <span id="vales-pix">R$ 0,00</span></p>
+
+                    <button id="btn-exportar-financeiro" class="btn" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório Financeiro</button>
+                </div>
+                <div id="relatorio-financeiro-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Relatório de Vendas de Produtos</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
+                                <th>Data/Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendas-produtos-table-body">
+                            <!-- Vendas de produtos serão adicionadas aqui -->
+                        </tbody>
+                    </table>
+                    <button id="btn-exportar-vendas-produtos" class="btn" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório de Vendas</button>
+                </div>
+                 <div id="relatorio-vendas-produtos-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+            </section>
+            
+            <section id="clientes-section" class="content-section">
+                <h1>Clientes Mensalistas</h1>
+                <p>Gerenciar contratos de clientes com pagamentos mensais.</p>
+
+                <!-- Formulário para Cadastro de Clientes -->
+                <div class="dashboard-card">
+                    <h2>Cadastrar Novo Cliente</h2>
+                    <form id="mensalista-form">
+                        <div class="input-group">
+                            <input type="text" id="cliente-nome" placeholder="Nome do Cliente" required>
+                        </div>
+                        <div class="input-group">
+                            <select id="cliente-tipo-veiculo" required>
+                                <option value="">Tipo de Veículo</option>
+                                <option value="Carro">Carro</option>
+                                <option value="Moto">Moto</option>
+                                <option value="Van">Van</option>
+                                <option value="Grande">Veículo de grande porte</option>
+                            <option value="Van">Van</option>
+                            <option value="Grande">Veículo de grande porte</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="cliente-placa" placeholder="Placa do Veículo (ex: ABC-1234)" required>
+                        </div>
+                        <div class="input-group">
+                            <input type="tel" id="cliente-telefone" placeholder="Telefone (ex: 99-99999-9999)">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="cliente-endereco" placeholder="Endereço">
+                        </div>
+                        <div class="input-group">
+                            <label for="cliente-valor-mensal">Valor Mensal (R$):</label>
+                            <input type="number" id="cliente-valor-mensal" step="0.01" min="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="cliente-data-vencimento">Data de Vencimento:</label>
+                            <input type="date" id="cliente-data-vencimento" required>
+                        </div>
+                        <button type="submit">Cadastrar Cliente</button>
+                    </form>
+                    <p id="mensalista-status-message" class="status-success" style="display: none;"></p>
+                </div>
+
+                <!-- Tabela para Listar Clientes Existentes -->
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h2>Clientes Ativos</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Veículo</th>
+                                <th>Placa</th>
+                                <th>Telefone</th>
+                                <th>Valor Mensal</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mensalistas-table-body">
+                            <!-- Linhas de clientes serão adicionadas aqui pelo JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="configuracoes-section" class="content-section">
+                <h1>Configurações</h1>
+                <p>Defina a capacidade e os valores de estacionamento.</p>
+                <form id="configuracoes-form">
+                    <h3>Capacidade do Estacionamento</h3>
+                    <div class="input-group">
+                        <label for="vagas-carro">Vagas para Carros (máx. 300)</label>
+                        <input type="number" id="vagas-carro" step="1" min="1" max="300" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="vagas-moto">Vagas para Motos (máx. 200)</label>
+                        <input type="number" id="vagas-moto" step="1" min="1" max="200" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="vagas-van">Vagas para Vans (máx. 100)</label>
+                        <input type="number" id="vagas-van" step="1" min="0" max="100" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="vagas-grande">Vagas para Veículos de Grande Porte (máx. 50)</label>
+                        <input type="number" id="vagas-grande" step="1" min="0" max="50" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="vagas-van">Vagas para Vans (máx. 100)</label>
+                        <input type="number" id="vagas-van" step="1" min="0" max="100" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="vagas-grande">Vagas para Veículos de Grande Porte (máx. 50)</label>
+                        <input type="number" id="vagas-grande" step="1" min="0" max="50" required>
+                    </div>
+                    <h3>Preços de Estacionamento</h3>
+                    <div class="input-group">
+                        <label for="carro-primeira-hora">Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="carro-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="carro-hora-adicional">Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="carro-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="moto-primeira-hora">Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="moto-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="moto-hora-adicional">Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="moto-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="van-primeira-hora">Van — Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="van-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="van-hora-adicional">Van — Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="van-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="grande-primeira-hora">Grande — Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="grande-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="grande-hora-adicional">Grande — Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="grande-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="van-primeira-hora">Van — Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="van-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="van-hora-adicional">Van — Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="van-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="grande-primeira-hora">Grande — Valor da 1ª Hora (R$)</label>
+                        <input type="number" id="grande-primeira-hora" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="grande-hora-adicional">Grande — Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="grande-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="juros-mensalista-diario">Juros Mensalista Diário (%):</label>
+                        <input type="number" id="juros-mensalista-diario" step="0.01" min="0" max="100" required>
+                    </div>
+                    <button type="submit">Salvar Configurações</button>
+                    <p id="status-configuracoes"></p>
+                </form>
+
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Gerenciar Usuários</h3>
+                    <form id="cadastro-usuario-form">
+                        <div class="input-group">
+                            <label for="novo-username">Nome de Usuário:</label>
+                            <input type="text" id="novo-username" placeholder="Nome de Usuário" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="novo-password">Senha:</label>
+                            <input type="password" id="novo-password" placeholder="Senha" required>
+                        </div>
+                        <button type="submit" style="background-color: var(--cor-principal);">Cadastrar Novo Usuário</button>
+                        <p id="usuario-status-message"></p>
+                    </form>
+
+                    <h4 style="margin-top: 20px;">Usuários Cadastrados</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome de Usuário</th>
+                                <th>Tipo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuarios-table-body">
+                            <!-- Usuários serão adicionados aqui -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal de Cobrança -->
+    <div id="cobranca-modal">
+        <div id="cobranca-content">
+            <h2>Cobrança de Estacionamento</h2>
+            <p>Placa: <span id="modal-placa" class="cobranca-placa"></span></p>
+            <p>Tempo: <span id="modal-duracao" class="cobranca-tempo"></span></p>
+            <p>Custo: <span id="modal-custo" class="cobranca-custo"></span></p>
+            
+            <div id="pagamento-opcoes" class="btn-pagamento-group">
+                <button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
+                <button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
+                <button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
+            </div>
+            
+            <div id="troco-container">
+                <label for="valor-recebido">Valor Recebido (R$):</label>
+                <input type="number" id="valor-recebido" step="0.01" min="0">
+                <p id="troco-valor">Troco: R$ 0,00</p>
+                <p id="troco-error">Valor insuficiente!</p>
+                <button id="btn-finalizar-dinheiro" class="btn" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento Mensalista -->
+    <div id="mensalista-pagamento-modal">
+        <div id="mensalista-pagamento-content">
+            <h2>Pagamento Mensalista</h2>
+            <p>Cliente: <span id="mensalista-nome-modal" class="mensalista-nome-modal"></span></p>
+            <p>Placa: <span id="mensalista-placa-modal"></span></p>
+            <p>Valor Base: <span id="mensalista-valor-base-modal"></span></p>
+            <p>Dias em Atraso: <span id="mensalista-dias-atraso-modal"></span></p>
+            <p>Juros: <span id="mensalista-juros-modal"></span></p>
+            <p>Total: <span id="mensalista-valor-total-modal" class="mensalista-valor-total-modal"></span></p>
+            
+            <div id="mensalista-pagamento-opcoes" class="btn-pagamento-group">
+                <button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
+                <button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
+                <button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
+            </div>
+            
+            <div id="mensalista-troco-container">
+                <label for="mensalista-valor-recebido">Valor Recebido (R$):</label>
+                <input type="number" id="mensalista-valor-recebido" step="0.01" min="0">
+                <p id="mensalista-troco-valor">Troco: R$ 0,00</p>
+                <p id="mensalista-troco-error">Valor insuficiente!</p>
+                <button id="btn-finalizar-mensalista-dinheiro" class="btn" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento de Vendas -->
+    <div id="venda-pagamento-modal">
+        <div id="venda-pagamento-content">
+            <h2>Finalizar Venda</h2>
+            <p>Total da Venda: <span id="venda-valor-total-modal" class="venda-valor-final-modal"></span></p>
+            
+            <div id="venda-pagamento-opcoes" class="btn-pagamento-group">
+                <button class="btn btn-pagamento" data-metodo="Dinheiro">Dinheiro</button>
+                <button class="btn btn-pagamento" data-metodo="Cartão">Cartão</button>
+                <button class="btn btn-pagamento" data-metodo="Pix">Pix</button>
+            </div>
+            
+            <div id="venda-troco-container">
+                <label for="venda-valor-recebido">Valor Recebido (R$):</label>
+                <input type="number" id="venda-valor-recebido" step="0.01" min="0">
+                <p id="venda-troco-valor">Troco: R$ 0,00</p>
+                <p id="venda-troco-error">Valor insuficiente!</p>
+                <button id="btn-finalizar-venda-dinheiro" class="btn" style="background-color: var(--cor-sucesso);">Finalizar Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert/Confirm Modal -->
+    <div id="custom-modal-backdrop">
+        <div id="custom-modal-content">
+            <h3 id="custom-modal-title">Título</h3>
+            <p id="custom-modal-message">Mensagem</p>
+            <div id="custom-modal-buttons">
+                <button id="custom-modal-ok" class="btn" style="background-color: var(--cor-principal); margin-right: 10px;">OK</button>
+                <button id="custom-modal-cancel" class="btn" style="background-color: var(--cor-erro);">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Containers para PDFs -->
+    <div id="recibo-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+    <div id="comprovante-entrada-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+    <div id="comprovante-venda-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
+
+    <script>
         // Variáveis Globais
         let vagasCarroTotal = 100;
         let vagasMotoTotal = 50;
@@ -1339,6 +1457,15 @@
         let carroPrecoHoraAdicional = 3.00;
         let motoPrecoPrimeiraHora = 3.00;
         let motoPrecoHoraAdicional = 2.00;
+        let vagasVanTotal = 10;
+        let vagasGrandeTotal = 5;
+
+        let vanPrecoPrimeiraHora = 7.00;
+        let vanPrecoHoraAdicional = 4.00;
+
+        let grandePrecoPrimeiraHora = 10.00;
+        let grandePrecoHoraAdicional = 6.00;
+
         let jurosMensalistaDiario = 0.5;
         let veiculosEstacionados = [];
         let relatoriosHistorico = [];
@@ -1390,6 +1517,8 @@
         // Elementos Vagas
         const vagasCarroGrid = document.getElementById('vagas-carro-grid');
         const vagasMotoGrid = document.getElementById('vagas-moto-grid');
+        const vagasVanGrid = document.getElementById('vagas-van-grid');
+        const vagasGrandeGrid = document.getElementById('vagas-grande-grid');
 
         // Elementos Caixa
         const caixaStatusText = document.getElementById('caixa-status-text');
@@ -1641,6 +1770,12 @@
                 carroPrecoHoraAdicional,
                 motoPrecoPrimeiraHora,
                 motoPrecoHoraAdicional,
+                vanPrecoPrimeiraHora,
+                vanPrecoHoraAdicional,
+                grandePrecoPrimeiraHora,
+                grandePrecoHoraAdicional,
+                vagasVanTotal,
+                vagasGrandeTotal,
                 jurosMensalistaDiario,
                 veiculosEstacionados,
                 relatoriosHistorico,
@@ -1671,6 +1806,12 @@
                 carroPrecoHoraAdicional = dados.carroPrecoHoraAdicional || 3.00;
                 motoPrecoPrimeiraHora = dados.motoPrecoPrimeiraHora || 3.00;
                 motoPrecoHoraAdicional = dados.motoPrecoHoraAdicional || 2.00;
+                vanPrecoPrimeiraHora = dados.vanPrecoPrimeiraHora || 7.00;
+                vanPrecoHoraAdicional = dados.vanPrecoHoraAdicional || 4.00;
+                grandePrecoPrimeiraHora = dados.grandePrecoPrimeiraHora || 10.00;
+                grandePrecoHoraAdicional = dados.grandePrecoHoraAdicional || 6.00;
+                vagasVanTotal = dados.vagasVanTotal || 10;
+                vagasGrandeTotal = dados.vagasGrandeTotal || 5;
                 jurosMensalistaDiario = dados.jurosMensalistaDiario || 0.5;
                 veiculosEstacionados = dados.veiculosEstacionados || [];
                 relatoriosHistorico = dados.relatoriosHistorico || [];
@@ -1797,13 +1938,13 @@
                 if (veiculo) {
                     const tempoEstacionado = (new Date() - new Date(veiculo.entrada)) / (1000 * 60 * 60);
                     div.innerHTML = `
-                        <h4>Vaga C${i}</h4>
+                        <h4>🚗 Vaga C${i}</h4>
                         <p class="placa">${veiculo.placa}</p>
                         <p class="tempo">${formatarDuracao(tempoEstacionado)}</p>
                     `;
                 } else {
                     div.innerHTML = `
-                        <h4>Vaga C${i}</h4>
+                        <h4>🚗 Vaga C${i}</h4>
                         <p>Livre</p>
                     `;
                 }
@@ -1821,29 +1962,86 @@
                 if (veiculo) {
                     const tempoEstacionado = (new Date() - new Date(veiculo.entrada)) / (1000 * 60 * 60);
                     div.innerHTML = `
-                        <h4>Vaga M${i}</h4>
+                        <h4>🏍️ Vaga M${i}</h4>
                         <p class="placa">${veiculo.placa}</p>
                         <p class="tempo">${formatarDuracao(tempoEstacionado)}</p>
                     `;
                 } else {
                     div.innerHTML = `
-                        <h4>Vaga M${i}</h4>
+                        <h4>🏍️ Vaga M${i}</h4>
                         <p>Livre</p>
                     `;
                 }
                 vagasMotoGrid.appendChild(div);
             }
+
+            
+            // Renderizar vagas de vans
+            vagasVanGrid.innerHTML = '';
+            for (let i = 1; i <= vagasVanTotal; i++) {
+                const vagaId = `van-${i}`;
+                const veiculo = veiculosEstacionados.find(v => v.vaga === vagaId);
+                const div = document.createElement('div');
+                div.className = `vaga-card ${veiculo ? 'ocupada' : 'livre'}`;
+                if (veiculo) {
+                    const tempoEstacionado = (new Date() - new Date(veiculo.entrada)) / (1000 * 60 * 60);
+                    div.innerHTML = `
+                        <h4>🚐 Vaga V${i}</h4>
+                        <p class="placa">${veiculo.placa}</p>
+                        <p class="tempo">${formatarDuracao(tempoEstacionado)}</p>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <h4>🚐 Vaga V${i}</h4>
+                        <p>Livre</p>
+                    `;
+                }
+                vagasVanGrid.appendChild(div);
+            }
+
+            // Renderizar vagas de veículos de grande porte
+            vagasGrandeGrid.innerHTML = '';
+            for (let i = 1; i <= vagasGrandeTotal; i++) {
+                const vagaId = `grande-${i}`;
+                const veiculo = veiculosEstacionados.find(v => v.vaga === vagaId);
+                const div = document.createElement('div');
+                div.className = `vaga-card ${veiculo ? 'ocupada' : 'livre'}`;
+                if (veiculo) {
+                    const tempoEstacionado = (new Date() - new Date(veiculo.entrada)) / (1000 * 60 * 60);
+                    div.innerHTML = `
+                        <h4>🚚 Vaga G${i}</h4>
+                        <p class="placa">${veiculo.placa}</p>
+                        <p class="tempo">${formatarDuracao(tempoEstacionado)}</p>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <h4>🚚 Vaga G${i}</h4>
+                        <p>Livre</p>
+                    `;
+                }
+                vagasGrandeGrid.appendChild(div);
+            }
+
         };
 
         const renderConfiguracoes = () => {
-            document.getElementById('vagas-carro').value = vagasCarroTotal;
-            document.getElementById('vagas-moto').value = vagasMotoTotal;
-            document.getElementById('carro-primeira-hora').value = carroPrecoPrimeiraHora;
-            document.getElementById('carro-hora-adicional').value = carroPrecoHoraAdicional;
-            document.getElementById('moto-primeira-hora').value = motoPrecoPrimeiraHora;
-            document.getElementById('moto-hora-adicional').value = motoPrecoHoraAdicional;
-            document.getElementById('juros-mensalista-diario').value = jurosMensalistaDiario;
-            renderUsuarios();
+            const setIfExists = (id, value) => { const el = document.getElementById(id); if (el) el.value = value; };
+            setIfExists('vagas-carro', vagasCarroTotal);
+            setIfExists('vagas-moto', vagasMotoTotal);
+            setIfExists('vagas-van', vagasVanTotal);
+            setIfExists('vagas-grande', vagasGrandeTotal);
+
+            setIfExists('carro-primeira-hora', carroPrecoPrimeiraHora);
+            setIfExists('carro-hora-adicional', carroPrecoHoraAdicional);
+            setIfExists('moto-primeira-hora', motoPrecoPrimeiraHora);
+            setIfExists('moto-hora-adicional', motoPrecoHoraAdicional);
+            setIfExists('van-primeira-hora', vanPrecoPrimeiraHora);
+            setIfExists('van-hora-adicional', vanPrecoHoraAdicional);
+            setIfExists('grande-primeira-hora', grandePrecoPrimeiraHora);
+            setIfExists('grande-hora-adicional', grandePrecoHoraAdicional);
+
+            setIfExists('juros-mensalista-diario', jurosMensalistaDiario);
+            try { renderUsuarios(); } catch(e) { }
         };
 
         const renderCaixa = () => {
@@ -2372,13 +2570,19 @@
             const diffMs = new Date(saida) - new Date(entrada);
             const diffHoras = diffMs / (1000 * 60 * 60);
 
-            let custo;
+            let custo = 0;
             if (tipo === 'Carro') {
                 custo = carroPrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * carroPrecoHoraAdicional);
-            } else { // Moto
+            } else if (tipo === 'Moto') {
                 custo = motoPrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * motoPrecoHoraAdicional);
+            } else if (tipo === 'Van') {
+                custo = vanPrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * vanPrecoHoraAdicional);
+            } else if (tipo === 'Grande') {
+                custo = grandePrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * grandePrecoHoraAdicional);
+            } else {
+                custo = carroPrecoPrimeiraHora + (Math.max(0, Math.ceil(diffHoras) - 1) * carroPrecoHoraAdicional);
             }
-            return { duracao: diffHoras, custo: custo };
+            return { duracao: diffHoras, custo: parseFloat(custo.toFixed(2)) };
         };
 
         const calcularJurosMensalista = (dataVencimentoStr, valorMensal) => {
@@ -3154,7 +3358,7 @@
                             break;
                         }
                     }
-                } else {
+                } else if (tipo === 'Moto') {
                     const vagasMotoOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Moto').length;
                     if (vagasMotoOcupadas >= vagasMotoTotal) {
                         showCustomAlert('Não há vagas disponíveis para motos.', 'Erro');
@@ -3166,9 +3370,35 @@
                             break;
                         }
                     }
+                } else if (tipo === 'Van') {
+                    const vagasVanOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Van').length;
+                    if (vagasVanOcupadas >= vagasVanTotal) {
+                        showCustomAlert('Não há vagas disponíveis para vans.', 'Erro');
+                        return;
+                    }
+                    for (let i = 1; i <= vagasVanTotal; i++) {
+                        if (!veiculosEstacionados.find(v => v.vaga === `van-${i}`)) {
+                            vagaLivre = `van-${i}`;
+                            break;
+                        }
+                    }
+                } else if (tipo === 'Grande') {
+                    const vagasGrandeOcupadas = veiculosEstacionados.filter(v => v.tipo === 'Grande').length;
+                    if (vagasGrandeOcupadas >= vagasGrandeTotal) {
+                        showCustomAlert('Não há vagas disponíveis para veículos de grande porte.', 'Erro');
+                        return;
+                    }
+                    for (let i = 1; i <= vagasGrandeTotal; i++) {
+                        if (!veiculosEstacionados.find(v => v.vaga === `grande-${i}`)) {
+                            vagaLivre = `grande-${i}`;
+                            break;
+                        }
+                    }
+                } else {
+                    showCustomAlert('Tipo de veículo inválido.', 'Erro');
+                    return;
                 }
-                
-                if (vagaLivre) {
+if (vagaLivre) {
                     const novoVeiculo = {
                         placa,
                         tipo,
@@ -3284,13 +3514,18 @@
                 e.preventDefault();
                 vagasCarroTotal = parseInt(document.getElementById('vagas-carro').value);
                 vagasMotoTotal = parseInt(document.getElementById('vagas-moto').value);
+                vagasVanTotal = parseInt(document.getElementById('vagas-van').value);
+                vagasGrandeTotal = parseInt(document.getElementById('vagas-grande').value);
                 carroPrecoPrimeiraHora = parseFloat(document.getElementById('carro-primeira-hora').value);
                 carroPrecoHoraAdicional = parseFloat(document.getElementById('carro-hora-adicional').value);
                 motoPrecoPrimeiraHora = parseFloat(document.getElementById('moto-primeira-hora').value);
                 motoPrecoHoraAdicional = parseFloat(document.getElementById('moto-hora-adicional').value);
+                vanPrecoPrimeiraHora = parseFloat(document.getElementById('van-primeira-hora').value);
+                vanPrecoHoraAdicional = parseFloat(document.getElementById('van-hora-adicional').value);
+                grandePrecoPrimeiraHora = parseFloat(document.getElementById('grande-primeira-hora').value);
+                grandePrecoHoraAdicional = parseFloat(document.getElementById('grande-hora-adicional').value);
                 jurosMensalistaDiario = parseFloat(document.getElementById('juros-mensalista-diario').value);
-                
-                salvarDados();
+salvarDados();
                 updateUI();
                 showStatusMessage('Configurações salvas com sucesso!', true, 'status-configuracoes');
             });
@@ -3668,70 +3903,6 @@
             logoutBtn.addEventListener('click', logout);
         });
     </script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const btnFazerBackup = document.getElementById('btn-fazer-backup');
-  const btnRestaurarBackup = document.getElementById('btn-restaurar-backup');
-  const inputRestaurarBackup = document.getElementById('input-restaurar-backup');
-
-  if (btnFazerBackup) {
-    btnFazerBackup.addEventListener('click', () => {
-      try {
-        const dados = localStorage.getItem('estacionamentoDados') || JSON.stringify({});
-        const blob = new Blob([dados], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const date = new Date().toISOString().slice(0,10);
-        a.download = `estacionamento_backup_${date}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        if (typeof showCustomAlert === 'function') {
-          showCustomAlert('Backup baixado com sucesso!', 'Sucesso');
-        }
-      } catch (e) {
-        if (typeof showCustomAlert === 'function') {
-          showCustomAlert('Não foi possível gerar o backup.', 'Erro');
-        } else {
-          alert('Não foi possível gerar o backup.');
-        }
-      }
-    });
-  }
-
-  if (btnRestaurarBackup && inputRestaurarBackup) {
-    btnRestaurarBackup.addEventListener('click', () => inputRestaurarBackup.click());
-
-    inputRestaurarBackup.addEventListener('change', (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const data = JSON.parse(evt.target.result);
-          localStorage.setItem('estacionamentoDados', JSON.stringify(data));
-          if (typeof carregarDados === 'function') carregarDados();
-          if (typeof updateUI === 'function') updateUI();
-          if (typeof showCustomAlert === 'function') {
-            showCustomAlert('Backup restaurado com sucesso!', 'Sucesso');
-          } else {
-            alert('Backup restaurado com sucesso!');
-          }
-        } catch (err) {
-          if (typeof showCustomAlert === 'function') {
-            showCustomAlert('Arquivo de backup inválido.', 'Erro');
-          } else {
-            alert('Arquivo de backup inválido.');
-          }
-        }
-      };
-      reader.readAsText(file);
-      // Limpar input para permitir restaurar o mesmo arquivo novamente se necessário
-      e.target.value = '';
-    });
-  }
-});
-</script></body>
+</body>
 </html>
+
