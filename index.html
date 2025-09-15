@@ -764,12 +764,14 @@
                     </div>
                     <div class="input-group">
                         <select id="tipo" required>
-<option value="">Selecione o Tipo de Veículo</option>
-<option value="Carro">Carro</option>
-<option value="Moto">Moto</option>
-<option value="Van">Van</option>
-<option value="Grande">Veículo de grande porte</option>
-</select>
+                            <option value="">Selecione o Tipo de Veículo</option>
+                            <option value="Carro">Carro</option>
+                            <option value="Moto">Moto</option>
+                                <option value="Van">Van</option>
+                                <option value="Grande">Veículo de grande porte</option>
+                            <option value="Van">Van</option>
+                            <option value="Grande">Veículo de grande porte</option>
+                        </select>
                     </div>
                     <button type="submit" id="btn-entrada">Registrar Entrada</button>
                     <p id="status-message"></p>
@@ -1184,12 +1186,14 @@
                         </div>
                         <div class="input-group">
                             <select id="cliente-tipo-veiculo" required>
-<option value="">Tipo de Veículo</option>
-<option value="Carro">Carro</option>
-<option value="Moto">Moto</option>
-<option value="Van">Van</option>
-<option value="Grande">Veículo de grande porte</option>
-</select>
+                                <option value="">Tipo de Veículo</option>
+                                <option value="Carro">Carro</option>
+                                <option value="Moto">Moto</option>
+                                <option value="Van">Van</option>
+                                <option value="Grande">Veículo de grande porte</option>
+                            <option value="Van">Van</option>
+                            <option value="Grande">Veículo de grande porte</option>
+                            </select>
                         </div>
                         <div class="input-group">
                             <input type="text" id="cliente-placa" placeholder="Placa do Veículo (ex: ABC-1234)" required>
@@ -1256,7 +1260,7 @@
                     <div class="input-group">
                         <label for="vagas-grande">Vagas para Veículos de Grande Porte (máx. 50)</label>
                         <input type="number" id="vagas-grande" step="1" min="0" max="50" required>
-                    </div><h3>Preços de Estacionamento</h3>
+                    </div>
                     <div class="input-group">
                         <label for="carro-primeira-hora">Valor da 1ª Hora (R$)</label>
                         <input type="number" id="carro-primeira-hora" step="0.01" min="0" required>
@@ -1286,13 +1290,29 @@
                         <input type="number" id="grande-primeira-hora" step="0.01" min="0" required>
                     </div>
                     <div class="input-group">
-                        <label for="grande-hora-adicional"><div class="input-group">
+                        <label for="grande-hora-adicional">Grande — Valor das Horas Adicionais (R$)</label>
+                        <input type="number" id="grande-hora-adicional" step="0.01" min="0" required>
+                    </div>
+                    <div class="input-group">
                         <label for="juros-mensalista-diario">Juros Mensalista Diário (%):</label>
                         <input type="number" id="juros-mensalista-diario" step="0.01" min="0" max="100" required>
                     </div>
                     <button type="submit">Salvar Configurações</button>
                     <p id="status-configuracoes"></p>
                 </form>
+                <div class="dashboard-card" style="margin-top: 20px;">
+                    <h3>Backup e Restauração do Sistema</h3>
+                    <p>Faça backup dos dados atuais do sistema (arquivo JSON) ou restaure a partir de um arquivo de backup.</p>
+                    <div class="input-group">
+                        <button type="button" id="btn-backup-sistema" class="btn" style="background-color: var(--cor-principal); width: auto; padding: 10px 20px;">Fazer Backup (Download JSON)</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="input-restore-file">Arquivo de Restauração (JSON):</label>
+                        <input type="file" id="input-restore-file" accept="application/json">
+                    </div>
+                    <p id="status-backup-restore" style="display:none;"></p>
+                </div>
+
 
                 <div class="dashboard-card" style="margin-top: 20px;">
                     <h3>Gerenciar Usuários</h3>
@@ -3498,7 +3518,63 @@ salvarDados();
                 showStatusMessage('Configurações salvas com sucesso!', true, 'status-configuracoes');
             });
 
-            abrirCaixaBtn.addEventListener('click', () => {
+            
+            // --- Backup e Restauração do Sistema (adicionado) ---
+            const btnBackupSistema = document.getElementById('btn-backup-sistema');
+            const inputRestoreFile = document.getElementById('input-restore-file');
+            const statusBackupRestore = document.getElementById('status-backup-restore');
+
+            if (btnBackupSistema) {
+                btnBackupSistema.addEventListener('click', () => {
+                    // Garantir que os dados estejam salvos antes do backup
+                    try { salvarDados(); } catch(e) { /* ignore */ }
+                    const dadosStr = localStorage.getItem('estacionamentoDados') || JSON.stringify({});
+                    const blob = new Blob([dadosStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `estacionamento-backup-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    showStatusMessage('Backup gerado e baixado com sucesso.', true, 'status-configuracoes');
+                });
+            }
+
+            if (inputRestoreFile) {
+                inputRestoreFile.addEventListener('change', (evt) => {
+                    const file = evt.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            const parsed = JSON.parse(ev.target.result);
+                            showCustomConfirm('Deseja substituir os dados atuais pelos dados do arquivo selecionado? Isso irá sobrescrever os dados no sistema.', 'Confirmar Restauração', (confirmed) => {
+                                if (confirmed) {
+                                    try {
+                                        localStorage.setItem('estacionamentoDados', JSON.stringify(parsed));
+                                        carregarDados();
+                                        updateUI();
+                                        showStatusMessage('Restauração concluída com sucesso!', true, 'status-configuracoes');
+                                    } catch (err) {
+                                        showCustomAlert('Erro ao restaurar os dados: ' + err.message, 'Erro');
+                                    }
+                                } else {
+                                    showStatusMessage('Restauração cancelada.', false, 'status-configuracoes');
+                                }
+                            });
+                        } catch (e) {
+                            showCustomAlert('Arquivo inválido. Selecione um arquivo JSON gerado pelo backup do sistema.', 'Erro');
+                        }
+                    };
+                    reader.readAsText(file);
+                    // Limpa o input para permitir o upload do mesmo arquivo novamente, se necessário
+                    inputRestoreFile.value = '';
+                });
+            }
+            // --- Fim Backup e Restauração ---
+abrirCaixaBtn.addEventListener('click', () => {
                 const funcionario = funcionarioCaixaInput.value.trim();
                 const valorInicial = parseFloat(valorInicialCaixaInput.value) || 0;
 
