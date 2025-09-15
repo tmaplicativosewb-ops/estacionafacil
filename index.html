@@ -726,6 +726,40 @@ document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
 }
 
 </style>
+
+<!-- INJEÇÃO: Forçar fonte 14 e negrito em impressões de relatórios/comprovantes -->
+<style>
+@media print {
+  /* Alvo restrito: recibos, comprovantes e seções de relatórios/financeiro/caixa/clientes/vendas */
+  .recibo-container,
+  #recibo-pdf-content,
+  #comprovante-entrada-pdf-content,
+  #comprovante-venda-pdf-content,
+  #relatorios-section,
+  #caixa-section,
+  #financeiro-section,
+  #clientes-section,
+  #vendas-section,
+  body.termica,
+  body.a4 {
+    font-size: 14px !important;
+    font-weight: bold !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Garanta que o corpo térmico tenha largura adequada (52mm/80mm) */
+  body.termica { width: 80mm !important; }
+  body.termica .recibo-container { width: 52mm !important; }
+
+  /* Ajustes adicionais para elementos comuns em comprovantes */
+  .recibo-header, .recibo-body, .recibo-footer, .recibo-item, .recibo-total, p, th, td, h1, h2, h3, h4, label, span {
+    font-size: 14px !important;
+    font-weight: bold !important;
+  }
+}
+</style>
+<!-- Fim da injeção de CSS de impressão -->
+
 </head>
 <body>
 
