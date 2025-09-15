@@ -4,8 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TM Estacionamento Web</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+
+// Botões extras de impressão com escolha de largura
+document.getElementById("btn-imprimir-termica").addEventListener("click", () => {
+    document.body.classList.remove("a4");
+    document.body.classList.remove("small");
+    document.body.classList.add("termica");
+    window.print();
+});
+document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
+    document.body.classList.remove("termica");
+    document.body.classList.remove("small");
+    document.body.classList.add("a4");
+    window.print();
+});
+
+// Atalho: se quiser 52mm, basta adicionar a classe "small" junto com "termica"
+
+document.getElementById("btn-imprimir-termica").addEventListener("click", () => {
+    document.body.classList.remove("a4");
+    document.body.classList.add("termica");
+    window.print();
+});
+document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
+    document.body.classList.remove("termica");
+    document.body.classList.add("a4");
+    window.print();
+});
+
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+
+// Botões extras de impressão com escolha de largura
+document.getElementById("btn-imprimir-termica").addEventListener("click", () => {
+    document.body.classList.remove("a4");
+    document.body.classList.remove("small");
+    document.body.classList.add("termica");
+    window.print();
+});
+document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
+    document.body.classList.remove("termica");
+    document.body.classList.remove("small");
+    document.body.classList.add("a4");
+    window.print();
+});
+
+// Atalho: se quiser 52mm, basta adicionar a classe "small" junto com "termica"
+
+document.getElementById("btn-imprimir-termica").addEventListener("click", () => {
+    document.body.classList.remove("a4");
+    document.body.classList.add("termica");
+    window.print();
+});
+document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
+    document.body.classList.remove("termica");
+    document.body.classList.add("a4");
+    window.print();
+});
+
+</script>
     <style>
         /* Estilos CSS */
         :root {
@@ -637,7 +695,37 @@
             width: auto;
             padding: 10px 20px;
         }
-    </style>
+    
+/* Estilos de impressão térmica */
+@media print {
+  body.termica {
+    font-size: 14px;
+    font-weight: bold;
+    width: 80mm;
+  }
+  body.termica .recibo-container {
+    width: 52mm;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.3;
+  }
+}
+
+/* Estilos de impressão A4 */
+@media print {
+  body.a4 {
+    font-size: 14px;
+    width: 210mm;
+    margin: 0 auto;
+  }
+  body.a4 .recibo-container {
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+</style>
 </head>
 <body>
 
@@ -768,9 +856,7 @@
                             <option value="Carro">Carro</option>
                             <option value="Moto">Moto</option>
                                 <option value="Van">Van</option>
-                                <option value="Grande">Veículo de grande porte</option>
-                            <option value="Van">Van</option>
-                            <option value="Grande">Veículo de grande porte</option>
+<option value="Grande">Veículo de grande porte</option>
                         </select>
                     </div>
                     <button type="submit" id="btn-entrada">Registrar Entrada</button>
@@ -1149,6 +1235,8 @@
                     <p class="pl-4 text-sm">Pix: <span id="vales-pix">R$ 0,00</span></p>
 
                     <button id="btn-exportar-financeiro" class="btn" style="background-color: var(--cor-principal); margin-top: 15px; width: auto; padding: 10px 20px;">Exportar Relatório Financeiro</button>
+<button id="btn-imprimir-termica" class="btn" style="background-color: #28a745; margin-top: 10px; width: auto; padding: 10px 20px;">Imprimir Térmico (52/80mm)</button>
+<button id="btn-imprimir-a4" class="btn" style="background-color: #6c757d; margin-top: 10px; width: auto; padding: 10px 20px;">Imprimir A4</button>
                 </div>
                 <div id="relatorio-financeiro-pdf-content" style="display: none; width: 500px; padding: 20px; box-sizing: border-box;"></div>
 
@@ -1190,9 +1278,7 @@
                                 <option value="Carro">Carro</option>
                                 <option value="Moto">Moto</option>
                                 <option value="Van">Van</option>
-                                <option value="Grande">Veículo de grande porte</option>
-                            <option value="Van">Van</option>
-                            <option value="Grande">Veículo de grande porte</option>
+<option value="Grande">Veículo de grande porte</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -3946,7 +4032,36 @@ abrirCaixaBtn.addEventListener('click', () => {
             // Evento para o botão de sair
             logoutBtn.addEventListener('click', logout);
         });
-    </script>
+    
+
+// Botões extras de impressão com escolha de largura
+document.getElementById("btn-imprimir-termica").addEventListener("click", () => {
+    document.body.classList.remove("a4");
+    document.body.classList.remove("small");
+    document.body.classList.add("termica");
+    window.print();
+});
+document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
+    document.body.classList.remove("termica");
+    document.body.classList.remove("small");
+    document.body.classList.add("a4");
+    window.print();
+});
+
+// Atalho: se quiser 52mm, basta adicionar a classe "small" junto com "termica"
+
+document.getElementById("btn-imprimir-termica").addEventListener("click", () => {
+    document.body.classList.remove("a4");
+    document.body.classList.add("termica");
+    window.print();
+});
+document.getElementById("btn-imprimir-a4").addEventListener("click", () => {
+    document.body.classList.remove("termica");
+    document.body.classList.add("a4");
+    window.print();
+});
+
+</script>
 </body>
 </html>
 
